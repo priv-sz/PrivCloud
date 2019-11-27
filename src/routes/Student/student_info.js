@@ -181,7 +181,7 @@ for (let i = 0; i < 100; i++) {
     });
 }
 const data8 = [];
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 10; i++) {
     data8.push({
         key: i.toString(),
         name: `Edrward ${i}`,
@@ -546,7 +546,8 @@ class StudentInfo extends React.Component {
                     </p>
                     <Table bordered dataSource={this.state.data7} columns={this.columns7} style={styles.tableStyle}/>
                     <Table style={styles.tableStyle} components={components} bordered dataSource={this.state.data8}
-                           columns={columns8}/>
+                           columns={columns8}
+                           pagination={false}/>
                 </Card>
                 <BackTop visibilityHeight={200} style={{right: 50}}/>
             </div>
