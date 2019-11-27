@@ -266,3 +266,34 @@ export function diff(obj1,obj2){
   }
   return true;
 }
+
+export function replace_space(str) {
+  return str.replace(/\s+/g,"");
+}
+
+export function transform_grade(str) {
+  let index_arr = replace_space(str).split('')
+  if (index_arr.length != 2 ){
+    return -1
+  }
+  try {
+    let sum = 0
+    switch (index_arr[0]) {
+      case '研':
+            sum += 0;
+            break;
+      case '博':
+            sum += 4;
+            break;
+      default:
+            sum += 0;
+    }
+    sum += Number(index_arr[1])
+    return sum
+  }
+  catch (e) {
+    return -1
+  }
+
+
+}

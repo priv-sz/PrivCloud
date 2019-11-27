@@ -37,7 +37,9 @@ class CustomMenu extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     //当点击面包屑导航时，侧边栏要同步响应
-    const pathname = nextProps.location.pathname
+    let pathname = nextProps.location.pathname
+    const rank = pathname.split('/')
+    pathname = `/${rank[1]}`
     if (this.props.location.pathname !== pathname) {
       this.setState({
         selectedKeys: [pathname],

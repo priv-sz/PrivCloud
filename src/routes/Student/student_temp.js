@@ -37,8 +37,6 @@ const columns4 = [
         dataIndex: 'github',
     }]
 
-let current_grade = ''
-let current_server_id = ''
 
 let data8 = person;
 data8 = data8.map((value,index)=>{
@@ -89,13 +87,11 @@ class EditableCell extends React.Component {
                             })(this.getInput())}
                         </FormItem>
                     }else if (editing && dataIndex === 'server_id'){
-                        Com_temp = <Select style={{ width: '100%' }}
-                                           onChange={(value => {
-                                               current_server_id = server_arr[value]
-                                           })}>
+                        console.log(1111)
+                        Com_temp = <Select style={{ width: '100%' }}>
                             {server_arr.map((server, index)=>{
                                 return (
-                                    <Option value={index} key={`option_${index}`}>
+                                    <Option value={index}>
                                         {server}
                                     </Option>
                                 )
@@ -103,10 +99,7 @@ class EditableCell extends React.Component {
                         </Select>
                     }else if (editing && dataIndex === 'grade'){
                         Com_temp = <Cascader options={grade_arr} placeholder="Please select"
-                                             displayRender={label => label[label.length - 1]}
-                                             onChange={(value => {
-                                                 current_grade = value[value.length-1]
-                                             })}/>
+                                             displayRender={label => label[label.length - 1]}/>
                     }
 
                     return (
@@ -131,9 +124,6 @@ class StudentInfo extends React.Component {
         pagination: {
             pageSize: 8
         },
-        current_stu:{},
-        current_grade:'',
-        current_server_id:'',
         count: data8.length,
         data8,
         editingKey: '',
@@ -202,7 +192,7 @@ class StudentInfo extends React.Component {
                 </span>
                         ) : (
                             <span>
-                                <a onClick={() => this.edit(record)}>编辑</a>
+                                <a onClick={() => this.edit(record.key)}>编辑</a>
                                 <Divider type="vertical"/>
                                 <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record.key)}>
                                 <a>删除</a>
@@ -299,18 +289,11 @@ class StudentInfo extends React.Component {
         return record.key === this.state.editingKey;
     };
 
-    edit(record) {
-        this.setState({
-            editingKey: record.key,
-            current_stu:record,
-        },()=>{
-            current_grade = record.grade
-            current_server_id = record.server_id
-        });
+    edit(key) {
+        this.setState({editingKey: key});
     }
 
     save(form, key) {
-        console.log(current_server_id)
         form.validateFields((error, row) => {
             if (error) {
                 return;
@@ -322,8 +305,6 @@ class StudentInfo extends React.Component {
                 newData.splice(index, 1, {
                     ...item,
                     ...row,
-                    ...{server_id:current_server_id},
-                    ...{grade:current_grade},
                 });
                 // TODO
                 this.setState({data8: newData, editingKey: ''},()=>{
@@ -339,10 +320,7 @@ class StudentInfo extends React.Component {
     }
 
     cancel = () => {
-        this.setState({
-            editingKey: '',
-            current_stu:{},
-        });
+        this.setState({editingKey: ''});
     };
 
     render() {
