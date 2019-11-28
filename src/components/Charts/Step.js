@@ -15,57 +15,108 @@ import {
     Util
 } from "bizcharts";
 
+import { randomNum } from '../../utils/utils'
+
 class Step extends React.Component {
     render() {
         const data = [
             {
-                time: "Jan",
-                value: 51
+                time: "00:00",
+                value: randomNum(0,3)*10
             },
             {
-                time: "Feb",
-                value: 91
+                time: "01:00",
+                value: randomNum(0,3)*10
             },
             {
-                time: "Mar",
-                value: 34
+                time: "02:00",
+                value: randomNum(0,3)*10
             },
             {
-                time: "Apr",
-                value: 47
+                time: "03:00",
+                value: randomNum(0,3)*10
             },
             {
-                time: "May",
-                value: 63
+                time: "04:00",
+                value: randomNum(0,3)*10
             },
             {
-                time: "June",
-                value: 58
+                time: "05:00",
+                value: randomNum(0,3)*10
             },
             {
-                time: "July",
-                value: 56
+                time: "06:00",
+                value: randomNum(0,3)*10
             },
             {
-                time: "Aug",
-                value: 77
+                time: "07:00",
+                value: randomNum(0,3)*10
             },
             {
-                time: "Sep",
-                value: 99
+                time: "08:00",
+                value: randomNum(7,10)*10
             },
             {
-                time: "Oct",
-                value: 106
+                time: "09:00",
+                value: randomNum(7,10)*10
             },
             {
-                time: "Nov",
-                value: 88
+                time: "10:00",
+                value: randomNum(7,10)*10
             },
             {
-                time: "Dec",
-                value: 56
-            }
+                time: "11:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "12:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "13:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "14:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "15:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "16:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "17:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "18:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "19:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "20:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "21:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "22:00",
+                value: randomNum(7,10)*10
+            },
+            {
+                time: "23:00",
+                value: randomNum(0,3)*10
+            },
+
         ];
         const cols = {
             time: {
@@ -73,6 +124,7 @@ class Step extends React.Component {
             },
             value:{
                 // tickCount:5, // 10 个区间
+                alias:'显存占用'
             }
         };
         return (
