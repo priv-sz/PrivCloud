@@ -5,12 +5,12 @@ import LoadableComponent from "../../utils/LoadableComponent";
 
 const Step_Chart = LoadableComponent(()=>import('../../components/Charts/Step'))
 
-class Student_detail extends React.Component {
+class Server_detail extends React.Component {
     render() {
         return (
             <div className='student_detail'>
-                <CustomBreadcrumb arr={[{title:'学生管理', to:'/student_info'}, '学生详情']}/>
-                <Card bordered={false} title='学生详情' style={{marginBottom: 10, minHeight: 440}} id='editTable'>
+                <CustomBreadcrumb arr={[{title:'服务器管理', to:'/server_info'}, '服务器详情']}/>
+                <Card bordered={false} title='服务器详情' style={{marginBottom: 10, minHeight: 440}} id='editTable'>
                     <Step_Chart />
                 </Card>
                 <BackTop visibilityHeight={200} style={{right: 50}}/>
@@ -29,4 +29,4 @@ const styles = {
     }
 }
 
-export default Student_detail
+export default Server_detail

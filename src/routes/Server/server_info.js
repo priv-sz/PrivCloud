@@ -1,10 +1,10 @@
 import React from 'react'
-import {Card, Popconfirm, Button, Icon, Table, Divider, BackTop, Affix, Anchor, Form, InputNumber, Input, Select,
-    Cascader} from 'antd'
+import { Card, Popconfirm, Button, Icon, Table, Divider, BackTop, Affix, Anchor, Form, InputNumber, Input, Select,
+    Cascader, Tag, Tooltip } from 'antd'
 import axios from 'axios'
 import CustomBreadcrumb from '../../components/CustomBreadcrumb/index'
 import TypingCard from '../../components/TypingCard'
-import { person } from '../../data/person'
+import { servers } from '../../data/server'
 import { server_arr, grade_arr } from '../../data/general'
 import { transform_grade } from '../../utils/utils'
 import LoadableComponent from '../../utils/LoadableComponent'
@@ -40,7 +40,7 @@ const columns4 = [
 let current_grade = ''
 let current_server_id = ''
 
-let data8 = person;
+let data8 = servers;
 data8 = data8.map((value,index)=>{
     return Object.assign({}, value, {'key':index.toString()})
 })
@@ -78,26 +78,7 @@ class EditableCell extends React.Component {
                 {(form) => {
                     const {getFieldDecorator} = form;
                     let Com_temp = React.Component
-                    if (editing && dataIndex === 'server_id'){
-                        Com_temp = <Select style={{ width: '100%' }}
-                                           onChange={(value => {
-                                               current_server_id = server_arr[value]
-                                           })}>
-                            {server_arr.map((server, index)=>{
-                                return (
-                                    <Option value={index} key={`option_${index}`}>
-                                        {server}
-                                    </Option>
-                                )
-                            })}
-                        </Select>
-                    }else if (editing && dataIndex === 'grade'){
-                        Com_temp = <Cascader options={grade_arr} placeholder="Please select"
-                                             displayRender={label => label[label.length - 1]}
-                                             onChange={(value => {
-                                                 current_grade = value[value.length-1]
-                                             })}/>
-                    } else if (editing){
+                    if (editing){
                         Com_temp = <FormItem style={{margin: 0}}>
                             {getFieldDecorator(dataIndex, {
                                 rules: [{
@@ -122,7 +103,7 @@ class EditableCell extends React.Component {
     }
 }
 
-class StudentInfo extends React.Component {
+class ServerInfo extends React.Component {
     state = {
         filteredInfo: null,
         sortedInfo: null,
@@ -143,41 +124,58 @@ class StudentInfo extends React.Component {
         this.getRemoteData()
     }
 
-    jump(student){
-        this.props.history.push('/student_info/student_detail')
+    jump(server){
+        this.props.history.push('/server_info/server_detail')
     }
 
     columns8 = [
         {
-            title: '姓名',
-            dataIndex: 'name',
-            width: '20%',
-            editable: true,
-        },
-        {
-            title: '年级',
-            dataIndex: 'grade',
-            width: '20%',
-            editable: true,
-            // sorter: (a, b) => a.grade_index - b.grade_index,
-            sorter: (a, b)=>{
-                let a_index = transform_grade(a.grade)
-                let b_index = transform_grade(b.grade)
-                return a_index - b_index
-            },
-            defaultSortOrder: 'descend',
-        },
-        {
             title: '服务器',
-            dataIndex: 'server_id',
-            width: '20%',
+            dataIndex: 'name',
+            width: '10%',
             editable: true,
         },
         {
-            title: 'GitHub',
-            dataIndex: 'GitHub',
-            width: '20%',
+            title: 'ip地址',
+            dataIndex: 'ip',
+            width: '12%',
             editable: true,
+        },
+        {
+            title: 'GPU信息',
+            dataIndex: 'gpu_info',
+            width: '60%',
+            render:(text, record) =>{
+                let gpu_info = record['gpu_info'].map((info, index)=>{
+                    let tag_type = info.usedMemry/info.totalMemry
+                    if (tag_type > 0 && tag_type <= 0.25) tag_type = 'purple'
+                    else if (tag_type > 0.25 && tag_type <= 0.5) tag_type = '#87d068'
+                    else if (tag_type > 0.5 && tag_type <= 0.75) tag_type = '#2db7f5'
+                    else if (tag_type > 0.75 ) tag_type = "#f50"
+                    return (
+                        <Tooltip placement="top" title={()=>{
+                            return (
+                                <div>
+                                    <p>{`显卡${info.fan}`}</p>
+                                    <p>{`总显存:${info.totalMemry}MiB`}</p>
+                                    <p>{`已用显存:${info.usedMemry}MiB`}</p>
+                                    <p>{`温度:${info.temp}℃`}</p>
+                                    <p>{`功耗:${info.power}`}</p>
+                                </div>
+                            )
+                        }}>
+                            <Tag color={tag_type}>
+                                {info.name}
+                            </Tag>
+                        </Tooltip>
+                    )
+                })
+                return (
+                    <div>
+                        {gpu_info}
+                    </div>
+                )
+            }
         },
         {
             title: '编辑',
@@ -293,9 +291,46 @@ class StudentInfo extends React.Component {
         const newData = {
             key: count.toString(),
             name: `待编辑`,
-            grade: `待编辑`,
-            server_id: `待编辑`,
-            GitHub:'待编辑'
+            ip: `待编辑`,
+            'gpu_info':[
+                {
+                    'name':'TITAN Xp',
+                    'totalMemry':12189,
+                    'usedMemry':0,
+                    'temp':60,
+                    'fan':0,
+                    'power':'59W/50W',
+                    'script':[]
+
+                },
+                {
+                    'name':'TITAN Xp',
+                    'totalMemry':12189,
+                    'usedMemry':0,
+                    'temp':60,
+                    'fan':1,
+                    'power':'59W/50W',
+                    'script':[]
+                },
+                {
+                    'name':'TITAN Xp',
+                    'totalMemry':12189,
+                    'usedMemry':0,
+                    'temp':60,
+                    'fan':2,
+                    'power':'59W/50W',
+                    'script':[]
+                },
+                {
+                    'name':'TITAN Xp',
+                    'totalMemry':12189,
+                    'usedMemry':0,
+                    'temp':60,
+                    'fan':3,
+                    'power':'59W/50W',
+                    'script':[]
+                },
+            ]
         };
         this.setState({
             data8: [...data8, newData],
@@ -378,24 +413,53 @@ class StudentInfo extends React.Component {
 
         return (
             <div>
-                <CustomBreadcrumb arr={['学生管理']}/>
-                {/*<Card bordered={false} title='远程加载数据' style={{marginBottom: 10, minHeight: 762}} id='remoteLoading'>*/}
-                {/*    <Table rowKey={record => record.login.uuid}*/}
-                {/*           loading={this.state.loading}*/}
-                {/*           dataSource={this.state.data4}*/}
-                {/*           // pagination={this.state.pagination}*/}
-                {/*           pagination={false}*/}
-                {/*           onChange={this.handleTableChange}*/}
-                {/*           columns={columns4} style={styles.tableStyle}/>*/}
-                {/*</Card>*/}
-                <Card bordered={false} title='学生列表' style={{marginBottom: 10, minHeight: 440}} id='editTable'>
+                <CustomBreadcrumb arr={['服务器管理']}/>
+                <Card bordered={false} title='服务器列表' style={{marginBottom: 10, minHeight: 440}} id='editTable'>
                     <p>
-                        <Button onClick={this.handleAdd}>添加同学</Button>
+                        <Button onClick={this.handleAdd}>添加服务器</Button>
+                        <Tag color={"#f50"} style={{marginLeft:20}}>
+                            75%以上
+                        </Tag>
+                        <Tag color={'#2db7f5'}>
+                            50%以上
+                        </Tag>
+                        <Tag color={'#87d068'}>
+                            25%以上
+                        </Tag>
+                        <Tag color={"purple"}>
+                            0以上
+                        </Tag>
                     </p>
+
                     <Table style={styles.tableStyle} components={components}  dataSource={this.state.data8}
                            columns={columns8}
                            pagination={false}
-                           expandedRowRender={record => <Step_Chart />}/>
+                           expandedRowRender={record => {
+                               let show_component = record.gpu_info.map((info, index)=>{
+
+                                   let tag_type = info.usedMemry/info.totalMemry
+                                   if (tag_type > 0 && tag_type <= 0.25) tag_type = 'purple'
+                                   else if (tag_type > 0.25 && tag_type <= 0.5) tag_type = '#87d068'
+                                   else if (tag_type > 0.5 && tag_type <= 0.75) tag_type = '#2db7f5'
+                                   else if (tag_type > 0.75 ) tag_type = "#f50"
+
+                                   let child_component = info.script.map((gpu_process, index)=>{
+                                       return (
+                                           <p><span>{`${info.fan}卡:`}</span><span style={{color:'#2db7f5'}}>{`${gpu_process.user}`}</span>训练<span style={{color:tag_type}}>{`${gpu_process.config}`}</span>持续<span style={{color:'orange'}}>{`${gpu_process.duration}`}</span></p>
+                                            )}
+                                       )
+                                   return (
+                                       <div>
+                                           {child_component}
+                                       </div>
+                                   )
+                               })
+                               return (
+                                   <div>
+                                       {show_component}
+                                   </div>
+                               )
+                           }}/>
                 </Card>
                 <BackTop visibilityHeight={200} style={{right: 50}}/>
             </div>
@@ -415,4 +479,4 @@ const styles = {
     }
 }
 
-export default StudentInfo
+export default ServerInfo
