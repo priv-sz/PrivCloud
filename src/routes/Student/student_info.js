@@ -1,6 +1,8 @@
 import React from 'react'
-import {Card, Popconfirm, Button, Icon, Table, Divider, BackTop, Affix, Anchor, Form, InputNumber, Input, Select,
-    Cascader} from 'antd'
+import {
+    Card, Popconfirm, Button, Icon, Table, Divider, BackTop, Affix, Anchor, Form, InputNumber, Input, Select,
+    Cascader, Tag
+} from 'antd'
 import axios from 'axios'
 import CustomBreadcrumb from '../../components/CustomBreadcrumb/index'
 import TypingCard from '../../components/TypingCard'
@@ -8,6 +10,8 @@ import { person } from '../../data/person'
 import { server_arr, grade_arr } from '../../data/general'
 import { transform_grade } from '../../utils/utils'
 import LoadableComponent from '../../utils/LoadableComponent'
+
+import person_tmp from '../../assets/icon/gtx.jpg'
 
 const Step_Chart = LoadableComponent(()=>import('../../components/Charts/Step'))
 
@@ -153,6 +157,22 @@ class StudentInfo extends React.Component {
             dataIndex: 'name',
             width: '20%',
             editable: true,
+            render:(text, record) =>{
+                return (
+                    <div style={{
+                        display:'flex',
+                        flexDirection:'row',
+                        alignItems:'center'
+                    }}>
+                        <img src={record.img} alt="" width='30px' height='30px' style={{borderRadius:15}}/>
+                        <span style={{
+                            marginLeft:10
+                        }}>
+                            {record.name}
+                        </span>
+                    </div>
+                )
+            }
         },
         {
             title: '年级',
@@ -170,14 +190,36 @@ class StudentInfo extends React.Component {
         {
             title: '服务器',
             dataIndex: 'server_id',
-            width: '20%',
+            width: '40%',
             editable: true,
-        },
-        {
-            title: 'GitHub',
-            dataIndex: 'GitHub',
-            width: '20%',
-            editable: true,
+            render:(text, record) =>{
+                let server_info = record.server_id.map((item, index)=>{
+                    let colorType = 'purple'
+                    if (item.includes("20")){
+                        colorType = 'purple'
+                    }
+                    if (item.includes("40")){
+                        colorType = '#87d068'
+                    }
+                    if (item.includes("60")){
+                        colorType = '#2db7f5'
+                    }
+                    if (item.includes("80")){
+                        colorType = '#f50'
+                    }
+
+                    return (
+                        <Tag color={colorType}>
+                            {item}
+                        </Tag>
+                    )
+                })
+                return (
+                    <div>
+                        {server_info}
+                    </div>
+                )
+            }
         },
         {
             title: '编辑',
@@ -208,13 +250,13 @@ class StudentInfo extends React.Component {
                 </span>
                         ) : (
                             <span>
-                                <a onClick={() => this.edit(record)}>编辑</a>
+                                {/*<a onClick={() => this.edit(record)}>编辑</a>*/}
+                                {/*<Divider type="vertical"/>*/}
+                                <a onClick={this.jump.bind(this, record)}>详情</a>
                                 <Divider type="vertical"/>
                                 <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record.key)}>
                                 <a>删除</a>
                                 </Popconfirm>
-                                <Divider type="vertical"/>
-                                <a onClick={this.jump.bind(this, record)}>详情</a>
                             </span>
                         )}
                     </div>
@@ -390,7 +432,7 @@ class StudentInfo extends React.Component {
                 {/*</Card>*/}
                 <Card bordered={false} title='学生列表' style={{marginBottom: 10, minHeight: 440}} id='editTable'>
                     <p>
-                        <Button onClick={this.handleAdd}>添加同学</Button>
+                        <Button onClick={this.jump.bind(this)}>添加同学</Button>
                     </p>
                     <Table style={styles.tableStyle} components={components}  dataSource={this.state.data8}
                            columns={columns8}

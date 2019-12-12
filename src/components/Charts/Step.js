@@ -17,120 +17,150 @@ import {
 
 import { randomNum } from '../../utils/utils'
 
-class Step extends React.Component {
-    render() {
-        const data = [
-            {
-                time: "00:00",
-                value: randomNum(0,3)*10
-            },
-            {
-                time: "01:00",
-                value: randomNum(0,3)*10
-            },
-            {
-                time: "02:00",
-                value: randomNum(0,3)*10
-            },
-            {
-                time: "03:00",
-                value: randomNum(0,3)*10
-            },
-            {
-                time: "04:00",
-                value: randomNum(0,3)*10
-            },
-            {
-                time: "05:00",
-                value: randomNum(0,3)*10
-            },
-            {
-                time: "06:00",
-                value: randomNum(0,3)*10
-            },
-            {
-                time: "07:00",
-                value: randomNum(0,3)*10
-            },
-            {
-                time: "08:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "09:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "10:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "11:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "12:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "13:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "14:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "15:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "16:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "17:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "18:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "19:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "20:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "21:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "22:00",
-                value: randomNum(7,10)*10
-            },
-            {
-                time: "23:00",
-                value: randomNum(0,3)*10
-            },
+const data_default = [
+    {
+        timestamp: "00:00",
+        value: randomNum(0,3)*100
+    },
+    {
+        timestamp: "01:00",
+        value: randomNum(0,3)*100
+    },
+    {
+        timestamp: "02:00",
+        value: randomNum(0,3)*100
+    },
+    {
+        timestamp: "03:00",
+        value: randomNum(0,3)*100
+    },
+    {
+        timestamp: "04:00",
+        value: randomNum(0,3)*100
+    },
+    {
+        timestamp: "05:00",
+        value: randomNum(0,3)*100
+    },
+    {
+        timestamp: "06:00",
+        value: randomNum(0,3)*100
+    },
+    {
+        timestamp: "07:00",
+        value: randomNum(0,3)*100
+    },
+    {
+        timestamp: "08:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "09:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "10:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "11:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "12:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "13:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "14:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "15:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "16:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "17:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "18:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "19:00",
+        value: randomNum(7,10)*100
+    },
+    {
+        timestamp: "20:00",
+        value: randomNum(7,10)*100
+    },
+];
+const cols_default = {
+    timestamp: {
+        range: [0, 1]
+    },
+    value:{
+        // tickCount:5, // 10 个区间
+        alias:'显存占用',
+        min: 0,
+    }
+};
 
-        ];
-        const cols = {
-            time: {
-                range: [0, 1]
-            },
-            value:{
-                // tickCount:5, // 10 个区间
-                alias:'显存占用'
+class Step extends React.Component {
+
+    // 构造
+      constructor(props) {
+        super(props);
+        // 初始状态
+        this.state = {
+            data:[],
+            cols:{
+                timestamp: {
+                    range: [0, 1]
+                },
+                value:{
+                    // tickCount:5, // 10 个区间
+                    alias:'显存占用',
+                    min: 0,
+                }
             }
         };
+      }
+
+    componentWillMount() {
+        let { data, cols } = this.props
+        data = data || data_default
+        cols = cols || cols_default
+        this.setState({
+            data,
+            cols
+        })
+    }
+
+    componentWillReceiveProps(nextProps, nextContext) {
+        let { data, cols } = nextProps
+        data = data || data_default
+        cols = cols || cols_default
+        this.setState({
+            data,
+            cols
+        })
+    }
+
+    render() {
+
         return (
             <div>
-                <Chart height={400} data={data} scale={cols} forceFit>
-                    <Axis name="time" />
+                <Chart height={400} data={this.state.data} scale={this.state.cols} forceFit>
+                    <Axis name="timestamp" />
                     <Axis name="value"
                           label={{
                               formatter: val => `${val}MiB`
@@ -140,7 +170,7 @@ class Step extends React.Component {
                             type: "y"
                         }}
                     />
-                    <Geom type="line" position="time*value" size={2} shape={"hv"} />
+                    <Geom type="line" position="timestamp*value" size={2} shape={"hv"} />
                 </Chart>
             </div>
         );

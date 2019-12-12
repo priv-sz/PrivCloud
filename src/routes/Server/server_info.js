@@ -1,12 +1,14 @@
 import React from 'react'
-import { Card, Popconfirm, Button, Icon, Table, Divider, BackTop, Affix, Anchor, Form, InputNumber, Input, Select,
-    Cascader, Tag, Tooltip } from 'antd'
+import {
+    Card, Popconfirm, Button, Icon, Table, Divider, BackTop, Affix, Anchor, Form, InputNumber, Input, Select,
+    Cascader, Tag, Tooltip, message
+} from 'antd'
 import axios from 'axios'
 import CustomBreadcrumb from '../../components/CustomBreadcrumb/index'
 import TypingCard from '../../components/TypingCard'
 import { servers } from '../../data/server'
-import { server_arr, grade_arr } from '../../data/general'
-import { transform_grade } from '../../utils/utils'
+import {HOST, DEL_SERVER, ALL_SERVER, EDI_SERVER} from '../../utils/url_config'
+import {_fetch} from "../../utils/utils";
 import LoadableComponent from '../../utils/LoadableComponent'
 
 const Step_Chart = LoadableComponent(()=>import('../../components/Charts/Step'))
@@ -40,7 +42,8 @@ const columns4 = [
 let current_grade = ''
 let current_server_id = ''
 
-let data8 = servers;
+// let data8 = servers;
+let data8 = [];
 data8 = data8.map((value,index)=>{
     return Object.assign({}, value, {'key':index.toString()})
 })
@@ -104,28 +107,48 @@ class EditableCell extends React.Component {
 }
 
 class ServerInfo extends React.Component {
-    state = {
-        filteredInfo: null,
-        sortedInfo: null,
-        loading: false,
-        data4: [],
-        pagination: {
-            pageSize: 8
-        },
-        current_stu:{},
-        current_grade:'',
-        current_server_id:'',
-        count: data8.length,
-        data8,
-        editingKey: '',
-    }
+    // 构造
+      constructor(props) {
+            super(props);
+            // 初始状态
+          this.state = {
+              filteredInfo: null,
+              sortedInfo: null,
+              loading: false,
+              data4: [],
+              pagination: {
+                  pageSize: 8
+              },
+              current_stu:{},
+              current_grade:'',
+              current_server_id:'',
+              count: data8.length,
+              data8,
+              editingKey: '',
+          }
+          this.handleAdd = this.handleAdd.bind(this)
+      }
 
-    componentDidMount() {
-        this.getRemoteData()
+    componentWillMount() {
+        // this.getRemoteData()
+        let query_url = HOST + ALL_SERVER
+        _fetch(query_url, {
+            }, (json)=>{
+            let server_data = json.err_msg
+            server_data = server_data.map((value,index)=>{
+                return Object.assign({}, value, {'key':index.toString()})
+            })
+            this.setState({
+                data8: server_data,
+                count: server_data.length
+            },()=>{
+                console.log(this.state.data8)
+            })
+        })
     }
 
     jump(server){
-        this.props.history.push('/server_info/server_detail')
+        this.props.history.push('/server_info/server_detail', server)
     }
 
     columns8 = [
@@ -137,7 +160,7 @@ class ServerInfo extends React.Component {
         },
         {
             title: 'ip地址',
-            dataIndex: 'ip',
+            dataIndex: 'host',
             width: '12%',
             editable: true,
         },
@@ -146,35 +169,44 @@ class ServerInfo extends React.Component {
             dataIndex: 'gpu_info',
             width: '60%',
             render:(text, record) =>{
-                let gpu_info = record['gpu_info'].map((info, index)=>{
-                    let tag_type = info.usedMemry/info.totalMemry
-                    if (tag_type > 0 && tag_type <= 0.25) tag_type = 'purple'
-                    else if (tag_type > 0.25 && tag_type <= 0.5) tag_type = '#87d068'
-                    else if (tag_type > 0.5 && tag_type <= 0.75) tag_type = '#2db7f5'
-                    else if (tag_type > 0.75 ) tag_type = "#f50"
+                if (record.data_info.length > 0){
+                    let gpu_info = record['data_info'][0]['gpu_info'].map((info, index)=>{
+                        let tag_type = info.usedMemry/info.totalMemry
+                        if (tag_type > 0 && tag_type <= 0.25) tag_type = 'purple'
+                        else if (tag_type > 0.25 && tag_type <= 0.5) tag_type = '#87d068'
+                        else if (tag_type > 0.5 && tag_type <= 0.75) tag_type = '#2db7f5'
+                        else if (tag_type > 0.75 ) tag_type = "#f50"
+                        return (
+                            <Tooltip placement="top" title={()=>{
+                                return (
+                                    <div>
+                                        <p>{`显卡${info.fan}`}</p>
+                                        <p>{`总显存:${Math.round(info.totalMemry/(1024*1024))}MiB`}</p>
+                                        <p>{`已用显存:${Math.round(info.usedMemry/(1024*1024))}MiB`}</p>
+                                        <p>{`温度:${info.temp}℃`}</p>
+                                        <p>{`功耗:${info.power}`}</p>
+                                    </div>
+                                )
+                            }}>
+                                <Tag color={tag_type}>
+                                    {info.name.split(' ').slice(0, 2).join(' ')}
+                                </Tag>
+                            </Tooltip>
+                        )
+                    })
                     return (
-                        <Tooltip placement="top" title={()=>{
-                            return (
-                                <div>
-                                    <p>{`显卡${info.fan}`}</p>
-                                    <p>{`总显存:${info.totalMemry}MiB`}</p>
-                                    <p>{`已用显存:${info.usedMemry}MiB`}</p>
-                                    <p>{`温度:${info.temp}℃`}</p>
-                                    <p>{`功耗:${info.power}`}</p>
-                                </div>
-                            )
-                        }}>
-                            <Tag color={tag_type}>
-                                {info.name}
-                            </Tag>
-                        </Tooltip>
+                        <div>
+                            {gpu_info}
+                        </div>
                     )
-                })
-                return (
-                    <div>
-                        {gpu_info}
-                    </div>
-                )
+                }
+                else {
+                    return (
+                        <div>
+                            暂未采集
+                        </div>
+                    )
+                }
             }
         },
         {
@@ -206,13 +238,11 @@ class ServerInfo extends React.Component {
                 </span>
                         ) : (
                             <span>
-                                <a onClick={() => this.edit(record)}>编辑</a>
-                                <Divider type="vertical"/>
-                                <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record.key)}>
-                                <a>删除</a>
-                                </Popconfirm>
-                                <Divider type="vertical"/>
                                 <a onClick={this.jump.bind(this, record)}>详情</a>
+                                <Divider type="vertical"/>
+                                <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record)}>
+                                    <a>删除</a>
+                                </Popconfirm>
                             </span>
                         )}
                     </div>
@@ -280,62 +310,31 @@ class ServerInfo extends React.Component {
             ...filters,
         })
     }
-    onDelete = (key) => {
-        const arr = this.state.data8.slice()
-        this.setState({
-            data8: arr.filter(item => item.key !== key)
+    onDelete = (record) => {
+          console.log(record)
+        let { host, name, key} = record
+        console.log(host)
+        console.log(name)
+        let query_url = HOST + DEL_SERVER
+        _fetch(query_url, {
+            host, name
+        },(json)=>{
+            if (json.status === 200){
+                message.success('删除成功')
+                const arr = this.state.data8.slice()
+                this.setState({
+                    data8: arr.filter(item => item.key !== key)
+                })
+            }
+            else {
+                message.error(json.err_msg)
+            }
         })
-    }
-    handleAdd = () => {
-        const {data8, count} = this.state //本来想用data7的length来代替count，但是删除行后，length会-1
-        const newData = {
-            key: count.toString(),
-            name: `待编辑`,
-            ip: `待编辑`,
-            'gpu_info':[
-                {
-                    'name':'TITAN Xp',
-                    'totalMemry':12189,
-                    'usedMemry':0,
-                    'temp':60,
-                    'fan':0,
-                    'power':'59W/50W',
-                    'script':[]
 
-                },
-                {
-                    'name':'TITAN Xp',
-                    'totalMemry':12189,
-                    'usedMemry':0,
-                    'temp':60,
-                    'fan':1,
-                    'power':'59W/50W',
-                    'script':[]
-                },
-                {
-                    'name':'TITAN Xp',
-                    'totalMemry':12189,
-                    'usedMemry':0,
-                    'temp':60,
-                    'fan':2,
-                    'power':'59W/50W',
-                    'script':[]
-                },
-                {
-                    'name':'TITAN Xp',
-                    'totalMemry':12189,
-                    'usedMemry':0,
-                    'temp':60,
-                    'fan':3,
-                    'power':'59W/50W',
-                    'script':[]
-                },
-            ]
-        };
-        this.setState({
-            data8: [...data8, newData],
-            count: count + 1
-        })
+
+    }
+    handleAdd() {
+        this.props.history.push('/server_info/add_server')
     }
     isEditing = (record) => {
         return record.key === this.state.editingKey;
@@ -435,7 +434,7 @@ class ServerInfo extends React.Component {
                            columns={columns8}
                            pagination={false}
                            expandedRowRender={record => {
-                               let show_component = record.gpu_info.map((info, index)=>{
+                               let show_component = record.data_info[0].gpu_info.map((info, index)=>{
 
                                    let tag_type = info.usedMemry/info.totalMemry
                                    if (tag_type > 0 && tag_type <= 0.25) tag_type = 'purple'
