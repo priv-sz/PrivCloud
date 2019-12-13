@@ -11,6 +11,8 @@ import {HOST, DEL_SERVER, ALL_SERVER, EDI_SERVER} from '../../utils/url_config'
 import {_fetch} from "../../utils/utils";
 import LoadableComponent from '../../utils/LoadableComponent'
 
+import { withRouter } from 'react-router-dom'
+
 const Step_Chart = LoadableComponent(()=>import('../../components/Charts/Step'))
 
 const { Option } = Select;
@@ -106,6 +108,7 @@ class EditableCell extends React.Component {
     }
 }
 
+@withRouter
 class ServerInfo extends React.Component {
     // 构造
       constructor(props) {
@@ -189,7 +192,7 @@ class ServerInfo extends React.Component {
                                 )
                             }}>
                                 <Tag color={tag_type}>
-                                    {info.name.split(' ').slice(0, 2).join(' ')}
+                                    {info.name.split(' ').slice(0, 3).join(' ')}
                                 </Tag>
                             </Tooltip>
                         )

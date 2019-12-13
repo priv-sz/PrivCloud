@@ -10,16 +10,9 @@ import 'animate.css'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
 
-const url = 'https://github.com/zhangZhiHao1996/image-store/blob/master/react-admin-master/bg1.jpg?raw=true'
-const imgs = [
-  'https://github.com/zhangZhiHao1996/image-store/blob/master/react-admin-master/slide1.jpg?raw=true',
-  'https://github.com/zhangZhiHao1996/image-store/blob/master/react-admin-master/slide2.jpg?raw=true',
-  'https://github.com/zhangZhiHao1996/image-store/blob/master/react-admin-master/slide3.jpg?raw=true',
-  'https://github.com/zhangZhiHao1996/image-store/blob/master/react-admin-master/slide4.jpg?raw=true'
-]
+import login_bg  from '../../assets/bg/login_bg.jpg'
 
-
-
+const url = login_bg
 
 
 @withRouter @inject('appStore') @observer
@@ -38,12 +31,12 @@ class Login extends React.Component {
       // this.props.appStore.toggleLogin(false) //也可以设置退出登录
     }
     this.initPage()
-    preloadingImages(imgs)  //预加载下一个页面的图片，预加载了第二次为什么还会去请求图片资源？
+    // preloadingImages(imgs)  //预加载下一个页面的图片，预加载了第二次为什么还会去请求图片资源？
   }
 
   componentWillUnmount () {
     this.particle && this.particle.destory()
-    notification.destroy()
+    // notification.destroy()
   }
   //载入页面时的一些处理
   initPage = () => {
@@ -60,11 +53,6 @@ class Login extends React.Component {
       //为什么写在then里？id为backgroundBox的DOM元素是在loading为false时才有，而上面的setState可能是异步的，必须等到setState执行完成后才去获取dom
       this.particle = new BGParticle('backgroundBox')
       this.particle.init()
-      notification.open({
-        message:<ul><li>初始账号：admin</li><li>初始密码：admin</li></ul>,
-        duration:0,
-        className:'login-notification'
-      })
     })
   }
   //切换showbox
@@ -122,8 +110,7 @@ const styles = {
     left: '0',
     width: '100vw',
     height: '100vh',
-    // backgroundImage: 'url(https://github.com/zhangZhiHao1996/image-store/blob/master/react-admin-master/bg5.jpg?raw=true)',
-    backgroundImage: 'url(https://github.com/zhangZhiHao1996/image-store/blob/master/react-admin-master/bg1.jpg?raw=true)',
+    background:`url(${login_bg}) no-repeat `,
     backgroundSize: '100% 100%',
     transition:'all .5s'
   },

@@ -90,6 +90,7 @@ class Server_content_1 extends React.Component {
     }
 
     componentWillMount() {
+
         let { name, interval, user, pwd, host } = this.props.server_info
         this.show_info = {
             name,

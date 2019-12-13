@@ -69,6 +69,7 @@ class LoginForm extends React.Component {
         }
 
         const users = this.props.appStore.users
+        console.log(users)
         // 检测用户名是否存在
         const result = users.find(item => item.username === values.username)
         if (!result) {
@@ -176,7 +177,7 @@ class LoginForm extends React.Component {
           </div>
         </Form>
         <div className='footer'>
-          <div>欢迎登陆后台管理系统</div>
+          <div>欢迎登陆 LaMer</div>
         </div>
       </div>
     )

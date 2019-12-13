@@ -111,6 +111,7 @@ const cols_default = {
         // tickCount:5, // 10 个区间
         alias:'显存占用',
         min: 0,
+        max: 12196*8
     }
 };
 
@@ -159,7 +160,7 @@ class Step extends React.Component {
 
         return (
             <div>
-                <Chart height={400} data={this.state.data} scale={this.state.cols} forceFit>
+                <Chart height={this.props.height || 400} data={this.state.data} scale={this.state.cols} forceFit>
                     <Axis name="timestamp" />
                     <Axis name="value"
                           label={{

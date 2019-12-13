@@ -78,10 +78,35 @@ export default class Server_content_2 extends React.Component{
     componentWillMount() {
         let { name, interval, user, pwd, host } = this.props.server_info
         this.server_info = this.props.server_info
+        console.log(this.server_info)
     }
 
     render() {
+          let server_info = this.server_info.data_info[0]
+
+          let show_component = server_info.gpu_info.map((info, index)=>{
+
+              let tag_type = info.usedMemry/info.totalMemry
+              if (tag_type > 0 && tag_type <= 0.25) tag_type = 'purple'
+              else if (tag_type > 0.25 && tag_type <= 0.5) tag_type = '#87d068'
+              else if (tag_type > 0.5 && tag_type <= 0.75) tag_type = '#2db7f5'
+              else if (tag_type > 0.75 ) tag_type = "#f50"
+
+              let child_component = info.script.map((gpu_process, index)=>{
+                  return (
+                      <p><span>{`${info.fan}卡:`}</span><span style={{color:'#2db7f5'}}>{`${gpu_process.user}`}</span>训练<span style={{color:tag_type}}>{`${gpu_process.config}`}</span>持续<span style={{color:'orange'}}>{`${gpu_process.duration}`}</span></p>
+                  )}
+              )
+              return (
+                  <div>
+                      {child_component}
+                  </div>
+              )
+          })
+
           let GPU_use_percent = 0
+          let diskTotal = 500
+          let diskUsage = 0
           if (this.state.chart_data.length > 0){
               let num = 0
               let sum = 0
@@ -96,24 +121,84 @@ export default class Server_content_2 extends React.Component{
               GPU_use_percent = Math.round(sum/num*100)/100
               console.log(GPU_use_percent)
               GPU_use_percent = GPU_use_percent > 100 ? GPU_use_percent / 10 : GPU_use_percent
+              diskTotal = this.state.chart_data[this.state.chart_data.length-1].diskTotal
+              diskUsage = this.state.chart_data[this.state.chart_data.length-1].diskUsage
           }
 
           return (
           <div className={'server_content_2'}>
               <Row gutter={16} style={{backgroundColor:'#F0F2F5', padding:10}}>
                   <Col span={18} >
-                      <Card bordered={false} title={this.server_info.name || 'GPU 使用信息'} >
+                      <Card hoverable bordered={false} title={this.server_info.name || 'GPU 使用信息'} >
                           <DatePicker onChange={this.onChange} />
-                          <Chart_step data={this.state.chart_data}/>
+                          <Chart_step data={this.state.chart_data} height={343}/>
                       </Card>
                   </Col>
                   <Col  span={6} >
-                      <Card bordered={false} title={'GPU 利用率'} >
-                          <Row span={24} type={'flex'} align={'center'}>
-                              <Progress type="circle" percent={GPU_use_percent.toFixed(2)}
-                                        strokeColor={'#F87E0E'}
-                              />
+                      <Row>
+                          <Card hoverable bordered={false} title={'GPU 利用率'} >
+                              <Row span={24} type={'flex'} align={'center'}>
+                                  <Progress type="circle" percent={GPU_use_percent.toFixed(2)}
+                                            strokeColor={'#F87E0E'}
+                                  />
+                              </Row>
+                          </Card>
+                      </Row>
+                      <Row style={{marginTop:15}}>
+                          <Card hoverable bordered={false} title={'硬盘空间'} >
+                              <Row span={24} type={'flex'} align={'center'}>
+                                  <Progress type="circle" percent={(server_info.diskUsage/server_info.diskTotal*100).toFixed(2)}
+                                            strokeColor={'#0BCB2B'}
+                                  />
+                                  <div>
+                                      {`${server_info.diskUsage}G / ${server_info.diskTotal}G`}
+                                  </div>
+                              </Row>
+                          </Card>
+                      </Row>
+                  </Col>
+              </Row>
+              <Row gutter={16} style={{backgroundColor:'#F0F2F5', padding:10, }}>
+                  <Col span={18} >
+                      <Card hoverable bordered={false} title={ `CPU ${server_info.cpu_model}`}
+                      style={{height:250}}>
+                          <Row gutter={16} type="flex" align="middle" justify="space-around">
+                              <Col span={8} style={style.cpu_col}>
+                                  <Progress type="circle" percent={(server_info.cpuUsagePercent/(server_info.cpu_num*100)*100).toFixed(2)}
+                                            strokeColor={'#46A3FC'}
+                                            format={percent => percent + '%'}
+                                  />
+                                  <div style={{marginTop:10}}>
+                                      {`CPU占用${server_info.cpuUsagePercent}%`}
+                                  </div>
+                              </Col>
+                              <Col span={8} style={style.cpu_col}>
+                                  <Progress type="circle" percent={(server_info.UsageMemory/server_info.TotalMemory*100).toFixed(2)}
+                                            strokeColor={'#6FD18C'}
+                                  />
+                                  <div style={{marginTop:10}}>
+                                      {'内存占用'}
+                                  </div>
+                              </Col>
+                              <Col span={8} style={style.cpu_col}>
+                                  <Progress type="circle" percent={(server_info.diskUsage/server_info.diskTotal*100).toFixed(2)}
+                                            strokeColor={'#FBDA6D'}
+                                  />
+                                  <div style={{marginTop:10}}>
+                                      {`硬盘`}
+                                  </div>
+                              </Col>
                           </Row>
+                      </Card>
+                  </Col>
+                  <Col  span={6} >
+                      <Card hoverable bordered={false} title={'当前进程'}
+                            style={{height:250,overflow:'scroll'}}>
+                          <div className={'overflow_div'}
+                              style={{
+                          }}>
+                              {show_component}
+                          </div>
                       </Card>
                   </Col>
               </Row>
@@ -121,4 +206,13 @@ export default class Server_content_2 extends React.Component{
 
           )
       }
+}
+
+const style = {
+    cpu_col:{
+        display:'flex',
+        flexDirection:'column',
+        justifyContent:'center',
+        alignItems:'center'
+    }
 }

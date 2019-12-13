@@ -2,12 +2,13 @@ import React from 'react'
 import { Carousel, Card, BackTop, Tabs, Spin } from 'antd'
 import CustomBreadcrumb from "../../components/CustomBreadcrumb";
 import LoadableComponent from "../../utils/LoadableComponent";
-
+import { withRouter } from 'react-router-dom'
 const Step_Chart = LoadableComponent(()=>import('../../components/Charts/Step'))
 const Server_content_1 = LoadableComponent(()=>import('./server_content_1'))
 const Server_content_2 = LoadableComponent(()=>import('./server_content_2'))
 const { TabPane } = Tabs;
 
+@withRouter
 class Server_detail extends React.Component {
     constructor(props) {
         super(props);
@@ -16,6 +17,9 @@ class Server_detail extends React.Component {
 
     componentWillMount() {
         console.log(this.props.location.state)
+        if (this.props.location.state === undefined){
+            this.props.history.push('/server_info', )
+        }
     }
 
     render() {

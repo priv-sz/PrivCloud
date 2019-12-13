@@ -6,7 +6,7 @@
     "@antv/data-set": "^0.8.9",
     "@babel/polyfill": "^7.2.5",
     "animate.css": "^3.6.1",
-    "antd": "^3.6.2",
+    "antd": "^3.26.2",
     "autoprefixer": "7.1.6",
     "axios": "^0.18.0",
     "babel-core": "6.26.0",
