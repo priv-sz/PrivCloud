@@ -17,7 +17,7 @@ const ServerAdd = LoadableComponent(()=>import('../../routes/Server/server_add')
 //学生管理
 const StudentInfo = LoadableComponent(()=>import('../../routes/Student/student_info'))
 const StudentDetail = LoadableComponent(()=>import('../../routes/Student/student_detail'))
-
+const StudentAdd = LoadableComponent(()=>import('../../routes/Student/student_add'))
 
 
 @withRouter
@@ -32,6 +32,7 @@ class ContentMain extends React.Component {
           <PrivateRoute exact path='/server_info/add_server' component={ServerAdd}/>
           <PrivateRoute exact path='/student_info' component={StudentInfo}/>
           <PrivateRoute exact path='/student_info/student_detail' component={StudentDetail}/>
+          <PrivateRoute exact path='/student_info/add_student' component={StudentAdd}/>
           <PrivateRoute exact path='/home/about' component={About}/>
           <Redirect exact from='/' to='/home'/>
         </Switch>

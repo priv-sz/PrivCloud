@@ -127,28 +127,36 @@ class EditableCell extends React.Component {
 }
 
 class StudentInfo extends React.Component {
-    state = {
-        filteredInfo: null,
-        sortedInfo: null,
-        loading: false,
-        data4: [],
-        pagination: {
-            pageSize: 8
-        },
-        current_stu:{},
-        current_grade:'',
-        current_server_id:'',
-        count: data8.length,
-        data8,
-        editingKey: '',
-    }
+    // 构造
+      constructor(props) {
+        super(props);
+        // 初始状态
+          this.state = {
+              filteredInfo: null,
+              sortedInfo: null,
+              loading: false,
+              data4: [],
+              pagination: {
+                  pageSize: 8
+              },
+              current_stu:{},
+              current_grade:'',
+              current_server_id:'',
+              count: data8.length,
+              data8,
+              editingKey: '',
+          }
+
+          this.jump = this.jump.bind(this)
+      }
 
     componentDidMount() {
         this.getRemoteData()
     }
 
-    jump(student){
-        this.props.history.push('/student_info/student_detail')
+    jump(route, student){
+        console.log(route)
+        this.props.history.push(route)
     }
 
     columns8 = [
@@ -252,7 +260,7 @@ class StudentInfo extends React.Component {
                             <span>
                                 {/*<a onClick={() => this.edit(record)}>编辑</a>*/}
                                 {/*<Divider type="vertical"/>*/}
-                                <a onClick={this.jump.bind(this, record)}>详情</a>
+                                <a onClick={this.jump.bind(this, 'student_info/student_detail', record)}>详情</a>
                                 <Divider type="vertical"/>
                                 <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record.key)}>
                                 <a>删除</a>
@@ -432,7 +440,7 @@ class StudentInfo extends React.Component {
                 {/*</Card>*/}
                 <Card bordered={false} title='学生列表' style={{marginBottom: 10, minHeight: 440}} id='editTable'>
                     <p>
-                        <Button onClick={this.jump.bind(this)}>添加同学</Button>
+                        <Button onClick={this.jump.bind(this, 'student_info/add_student')}>添加同学</Button>
                     </p>
                     <Table style={styles.tableStyle} components={components}  dataSource={this.state.data8}
                            columns={columns8}

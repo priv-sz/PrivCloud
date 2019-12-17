@@ -47,7 +47,7 @@ class Server_content_1 extends React.Component {
                 if (match_obj(this.show_info, values)){
                     message.warning('无修改')
                 }else {
-                    let query_url = HOST + EDI_SERVER
+                    let query_url = HOST() + EDI_SERVER
                     let { name, interval, user, pwd, host } = values
                     let new_data = {
                         name,

@@ -309,7 +309,8 @@ export function transform_grade(str) {
             sum += 0;
             break;
       case '博':
-            sum += 4;
+            // sum += 4;
+            sum += 10;
             break;
       default:
             sum += 0;

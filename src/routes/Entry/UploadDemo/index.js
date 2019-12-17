@@ -78,15 +78,15 @@ class UploadDemo extends React.Component {
   }
 
   beforeUpload(file, fileList) {
-    const isJPG = file.type === 'image/jpeg'
-    if (!isJPG) {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    if (!isJpgOrPng) {
       message.error('只能上传JPG格式的图片');
     }
     const isLt2M = file.size / 1024 / 1024 < 2;
     if (!isLt2M) {
       message.error('图片大小不超过 2MB!');
     }
-    return isJPG && isLt2M;
+    return isJpgOrPng && isLt2M;
   }
 
   handleChange = (info) => {

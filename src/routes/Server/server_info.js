@@ -134,7 +134,7 @@ class ServerInfo extends React.Component {
 
     componentWillMount() {
         // this.getRemoteData()
-        let query_url = HOST + ALL_SERVER
+        let query_url = HOST() + ALL_SERVER
         _fetch(query_url, {
             }, (json)=>{
             let server_data = json.err_msg
@@ -318,7 +318,8 @@ class ServerInfo extends React.Component {
         let { host, name, key} = record
         console.log(host)
         console.log(name)
-        let query_url = HOST + DEL_SERVER
+        let query_url = HOST() + DEL_SERVER
+        console.log(query_url)
         _fetch(query_url, {
             host, name
         },(json)=>{

@@ -32,7 +32,7 @@ export default class Server_content_2 extends React.Component{
 
     onChange(date, dateString){
         let timestamp = Math.round(date._d.getTime()/1000)
-        let query_url = HOST + WEEK_SERVER_DATA
+        let query_url = HOST() + WEEK_SERVER_DATA
         let mess_load = message.loading('查询中', 0);
         _fetch(query_url,{
             start_time:timestamp,

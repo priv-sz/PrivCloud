@@ -43,7 +43,7 @@ class Server_add extends React.Component {
             if (err) {
                 message.warning('请先填写正确的表单')
             } else {
-                let query_url = HOST + ADD_SERVER
+                let query_url = HOST() + ADD_SERVER
                 let { name, interval, user, pwd, host } = values
                 let new_data = {
                     name,

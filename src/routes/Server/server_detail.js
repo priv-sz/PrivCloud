@@ -23,6 +23,16 @@ class Server_detail extends React.Component {
     }
 
     render() {
+        if (this.props.location.state === undefined){
+            this.props.history.push('/server_info', )
+            return <div className='student_detail' >
+                <CustomBreadcrumb arr={[{title:'服务器管理', to:'/server_info'}, '服务器详情']}/>
+                    <div>
+                        跳转回服务器管理
+                    </div>
+                <BackTop visibilityHeight={200} style={{right: 50}}/>
+            </div>
+        }
         return (
             <div className='student_detail' >
                 <CustomBreadcrumb arr={[{title:'服务器管理', to:'/server_info'}, '服务器详情']}/>
