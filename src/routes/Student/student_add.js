@@ -1,6 +1,6 @@
 import React from 'react'
 import {Card, Upload, Tooltip, Icon, Form, Checkbox, Select, Input, Button, Col, Row, message, BackTop,
-    Spin, Modal} from 'antd'
+    Spin, Modal, Radio} from 'antd'
 import CustomBreadcrumb from '../../components/CustomBreadcrumb/index'
 import TypingCard from '../../components/TypingCard'
 import {HOST, ADD_STUDENT, ALL_SERVER, UPLOAD_IMG_TMP} from '../../utils/url_config'
@@ -29,6 +29,7 @@ class Server_add extends React.Component {
             loading: false,
             server:[]
         };
+        this.server_struct = {}
       }
 
     beforeUpload(file, fileList) {
@@ -69,19 +70,22 @@ class Server_add extends React.Component {
                 console.log(err)
                 message.warning('请先填写正确的表单')
             } else {
-                // let query_url = HOST() + ADD_STUDENT
-                let query_url = 'http://127.0.0.1:9000' + ADD_STUDENT
+                let query_url = HOST() + ADD_STUDENT
+                // let query_url = 'http://127.0.0.1:9000' + ADD_STUDENT
                 let server = values.server.map((value, index)=>{
+                    // console.log(this.server_struct)
+                    // console.log(this.server_struct[value])
                     return {
                         host:value,
+                        name:this.server_struct[value],
                         user:values.user,
-                        pwd:values.pwd
+                        pwd:values.pwd,
                     }
                 })
                 console.log({
                     name:values.name,
                     grade:values.grade,
-                    gender:'1',
+                    gender:values.gender,
                     github:values.github,
                     phone:values.phone,
                     server:server,
@@ -93,16 +97,17 @@ class Server_add extends React.Component {
                     _fetch(query_url,{
                         name:values.name,
                         grade:values.grade,
-                        gender:'1',
+                        gender:values.gender,
                         github:values.github,
                         phone:values.phone,
                         server:server,
-                        img_addr:this.state.imageUrl
+                        img_addr:this.state.imageUrl,
+                        stuid:values.stuid
                     },(json)=>{
+                        console.log(json)
                         this.setState({
                             loading: false
                         },()=>{
-                            // console.log(json)
                             if (json.status === 200){
                                 message.success('提交成功')
                             }
@@ -131,7 +136,11 @@ class Server_add extends React.Component {
                 })
                 this.setState({
                     server: server_data
-                },)
+                },()=>{
+                    this.state.server.forEach((value, index)=>{
+                        this.server_struct[value.host] = value.name
+                    });
+                })
             }
             else {
                 message.error(json.err_msg)
@@ -147,7 +156,6 @@ class Server_add extends React.Component {
                 <Option value={value.host}>{value.name}</Option>
             )
         })
-
 
         // config img
         const { imageUrl } = this.state;
@@ -241,6 +249,28 @@ class Server_add extends React.Component {
                                 }
                                 { Upload_img }
                             </FormItem>
+                            <FormItem {...formItemLayout} required label={(
+                                <span>
+                                    性别&nbsp;
+                                </span>
+                            )}>
+                                {
+                                    getFieldDecorator('gender', {
+                                        initialValue:1,
+                                        rules: [
+                                            {
+                                                required: true,
+                                                message: '请选择性别'
+                                            }
+                                        ],
+                                    })(
+                                        <Radio.Group name="gender_radiogroup" >
+                                            <Radio value={0}>男</Radio>
+                                            <Radio value={1}>女</Radio>
+                                        </Radio.Group>
+                                    )
+                                }
+                            </FormItem>
                             <FormItem label='年级' {...formItemLayout} required>
                                 {
                                     getFieldDecorator('grade', {
@@ -259,6 +289,21 @@ class Server_add extends React.Component {
                                             <Option value={14}>博 4</Option>
                                             <Option value={15}>博 5</Option>
                                         </Select>
+                                    )
+                                }
+                            </FormItem>
+                            <FormItem label='学号' {...formItemLayout}>
+                                {
+                                    getFieldDecorator('stuid', {
+                                        rules: [
+                                            {
+                                                pattern: /^[0-9]+$/,
+                                                required: true,
+                                                message: '请输入正确的学号'
+                                            }
+                                        ]
+                                    })(
+                                        <Input />
                                     )
                                 }
                             </FormItem>

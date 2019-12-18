@@ -145,7 +145,7 @@ class ServerInfo extends React.Component {
                 data8: server_data,
                 count: server_data.length
             },()=>{
-                console.log(this.state.data8)
+                // console.log(this.state.data8)
             })
         })
     }

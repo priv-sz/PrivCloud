@@ -14,7 +14,7 @@ import {
     Facet,
     Util
 } from "bizcharts";
-
+import { chart_color } from './chart_config'
 import { randomNum } from '../../utils/utils'
 
 const data_default = [
@@ -132,27 +132,37 @@ class Step extends React.Component {
                     alias:'显存占用',
                     min: 0,
                 }
-            }
+            },
+            x_name:'timestamp',
+            y_name:'value'
         };
       }
 
     componentWillMount() {
-        let { data, cols } = this.props
+        let { data, cols, x_name, y_name } = this.props
         data = data || data_default
         cols = cols || cols_default
+        x_name = x_name || 'timestamp'
+        y_name = y_name || 'value'
         this.setState({
             data,
-            cols
+            cols,
+            x_name,
+            y_name
         })
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
-        let { data, cols } = nextProps
+        let { data, cols, x_name, y_name } = nextProps
         data = data || data_default
         cols = cols || cols_default
+        x_name = x_name || 'timestamp'
+        y_name = y_name || 'value'
         this.setState({
             data,
-            cols
+            cols,
+            x_name,
+            y_name
         })
     }
 
@@ -161,17 +171,28 @@ class Step extends React.Component {
         return (
             <div>
                 <Chart height={this.props.height || 400} data={this.state.data} scale={this.state.cols} forceFit>
-                    <Axis name="timestamp" />
-                    <Axis name="value"
+                    <Axis name={this.state.x_name} />
+                    <Axis name={this.state.y_name}
                           label={{
-                              formatter: val => `${val}MiB`
+                              formatter: val => `${val} MiB`
                           }}/>
                     <Tooltip
                         crosshairs={{
                             type: "y"
                         }}
                     />
-                    <Geom type="line" position="timestamp*value" size={2} shape={"hv"} />
+                    <Geom type="line" position={`${this.state.x_name}*${this.state.y_name}`} size={2} shape={"hv"} />
+                    {/*<Geom*/}
+                    {/*    type="point"*/}
+                    {/*    position={`${this.state.x_name}*${this.state.y_name}`}*/}
+                    {/*    size={1}*/}
+                    {/*    shape={"circle"}*/}
+                    {/*    color={["state_type", chart_color]}*/}
+                    {/*    style={{*/}
+                    {/*        stroke: "#fff",*/}
+                    {/*        lineWidth: 1*/}
+                    {/*    }}*/}
+                    {/*/>*/}
                 </Chart>
             </div>
         );

@@ -15,7 +15,10 @@ export let EDI_SERVER = '/edi_server'
 export let DEL_SERVER = '/server_del'
 export let WEEK_SERVER_DATA = '/week_data'
 
+export let ALL_STUDENT = '/stu_sel'
+export let EDI_STUDENT = '/stu_edi'
 export let ADD_STUDENT = '/stu_add'
+export let DEL_STUDENT = '/stu_del'
 
 export let TEST = '/test_json'
 export let UPLOAD_IMG_TMP = '/upload_tmp'

@@ -293,6 +293,46 @@ export function diff(obj1,obj2){
   return true;
 }
 
+export function getGrade(grade_index) {
+  let grade = ''
+  switch (grade_index) {
+    case 0:
+      grade = '研 0';
+      break;
+    case 1:
+      grade = '研 1';
+      break;
+    case 2:
+      grade = '研 2';
+      break;
+    case 3:
+      grade = '研 3';
+      break;
+    case 10:
+      grade = '博 0';
+      break;
+    case 11:
+      grade = '博 1';
+      break;
+    case 12:
+      grade = '博 2';
+      break;
+    case 13:
+      grade = '博 3';
+      break;
+    case 14:
+      grade = '博 4';
+      break;
+    case 15:
+      grade = '博 5';
+      break;
+    default:
+      grade = '研 0';
+      break;
+  }
+  return grade
+}
+
 export function replace_space(str) {
   return str.replace(/\s+/g,"");
 }
@@ -449,3 +489,48 @@ export function timestamp2Date(format, timestamp){
     return ret;
   });
 }
+
+/*
+** 时间戳转换成指定格式日期
+** eg.
+** dateFormat(11111111111111, 'Y年m月d日 H时i分')
+** → "2322年02月06日 03时45分"
+*/
+export let dateFormat = function (timestamp, formats) {
+  // formats格式包括
+  // 1. Y-m-d
+  // 2. Y-m-d H:i:s
+  // 3. Y年m月d日
+  // 4. Y年m月d日 H时i分
+
+  formats = formats || 'Y-m-d H:i:s';
+
+
+  var zero = function (value) {
+    if (value < 10) {
+      return '0' + value;
+    }
+    return value;
+  };
+
+  var myDate = timestamp? new Date(timestamp): new Date();
+
+  var year = myDate.getFullYear();
+  var month = zero(myDate.getMonth() + 1);
+  var day = zero(myDate.getDate());
+
+  var hour = zero(myDate.getHours());
+  var minite = zero(myDate.getMinutes());
+  var second = zero(myDate.getSeconds());
+
+  return formats.replace(/Y|m|d|H|i|s/ig, function (matches) {
+    return ({
+      Y: year,
+      m: month,
+      d: day,
+      H: hour,
+      i: minite,
+      s: second
+    })[matches];
+  });
+};

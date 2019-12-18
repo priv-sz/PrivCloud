@@ -131,7 +131,16 @@ export default class Server_content_2 extends React.Component{
                   <Col span={18} >
                       <Card hoverable bordered={false} title={this.server_info.name || 'GPU 使用信息'} >
                           <DatePicker onChange={this.onChange} />
-                          <Chart_step data={this.state.chart_data} height={343}/>
+                          <Chart_step data={this.state.chart_data} cols={{
+                              timestamp: {
+                                  range: [0, 1]
+                              },
+                              value:{
+                                  // tickCount:5, // 10 个区间
+                                  alias:'显存占用',
+                                  min: 0,
+                              }
+                          }} height={343}/>
                       </Card>
                   </Col>
                   <Col  span={6} >

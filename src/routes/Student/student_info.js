@@ -1,54 +1,38 @@
 import React from 'react'
 import {
     Card, Popconfirm, Button, Icon, Table, Divider, BackTop, Affix, Anchor, Form, InputNumber, Input, Select,
-    Cascader, Tag
+    Cascader, Tag, message
 } from 'antd'
 import axios from 'axios'
+import male from '../../assets/icon/Male.ico'
+import female from '../../assets/icon/Female.ico'
 import CustomBreadcrumb from '../../components/CustomBreadcrumb/index'
 import TypingCard from '../../components/TypingCard'
 import { person } from '../../data/person'
 import { server_arr, grade_arr } from '../../data/general'
-import { transform_grade } from '../../utils/utils'
+import {_fetch, transform_grade, getGrade, dateFormat, deepCopy} from '../../utils/utils'
 import LoadableComponent from '../../utils/LoadableComponent'
 
 import person_tmp from '../../assets/icon/gtx.jpg'
+import {ADD_STUDENT, ALL_STUDENT, DEL_SERVER, DEL_STUDENT, HOST} from "../../utils/url_config";
+import { Generate_Clus } from '../../components/Charts/Generate_chart'
 
-const Step_Chart = LoadableComponent(()=>import('../../components/Charts/Step'))
+
+const Chart_step = LoadableComponent(()=>import('../../components/Charts/Step'))
+const Clusteredstacked = LoadableComponent(()=>import('../../components/Charts/Clusteredstacked'))
 
 const { Option } = Select;
 
-const columns4 = [
-    {
-        title: 'Name',
-        dataIndex: 'name',
-        sorter: true,
-        render: name => `${name.first} ${name.last}`,
-        width: '20%',
-    }, {
-        title: 'Gender',
-        dataIndex: 'gender',
-        filters: [
-            {text: 'Male', value: 'male'},
-            {text: 'Female', value: 'female'},
-        ],
-        width: '20%',
-    }, {
-        title: 'Email',
-        dataIndex: 'email',
-    },
-    {
-        title: 'GitHub',
-        dataIndex: 'github',
-    }]
-
 let current_grade = ''
-let current_server_id = ''
+let current_server = ''
 
-let data8 = person;
+// let data8 = person;
+let data8 = [];
 data8 = data8.map((value,index)=>{
     return Object.assign({}, value, {'key':index.toString()})
 })
 
+let local_url = HOST()
 
 const FormItem = Form.Item;
 const EditableContext = React.createContext();
@@ -82,10 +66,10 @@ class EditableCell extends React.Component {
                 {(form) => {
                     const {getFieldDecorator} = form;
                     let Com_temp = React.Component
-                    if (editing && dataIndex === 'server_id'){
+                    if (editing && dataIndex === 'server'){
                         Com_temp = <Select style={{ width: '100%' }}
                                            onChange={(value => {
-                                               current_server_id = server_arr[value]
+                                               current_server = server_arr[value]
                                            })}>
                             {server_arr.map((server, index)=>{
                                 return (
@@ -141,7 +125,7 @@ class StudentInfo extends React.Component {
               },
               current_stu:{},
               current_grade:'',
-              current_server_id:'',
+              current_server:'',
               count: data8.length,
               data8,
               editingKey: '',
@@ -152,6 +136,52 @@ class StudentInfo extends React.Component {
 
     componentDidMount() {
         this.getRemoteData()
+    }
+
+    componentWillMount() {
+        let query_url = HOST() + ALL_STUDENT
+        _fetch(query_url,{},(json)=>{
+            let server_data = json.err_msg
+            server_data = server_data.map((person, person_i)=>{
+                let dataSource = []
+                for (let item of person.data_info){
+                    dataSource = dataSource.concat(item)
+                }
+                dataSource = dataSource.sort((a,b)=>{
+                    return a.timestamp-b.timestamp
+                })
+                console.log('********')
+                console.log(person.name)
+                dataSource = dataSource.map((data_item, data_item_i)=>{
+                    console.log(data_item.timestamp)
+                    // 时间戳转换 在 chart data 赋值里做
+                    // if (typeof data_item.timestamp === "number"){
+                    //     data_item.timestamp = dateFormat(data_item.timestamp*1000,'m-d H:i:s')
+                    // }
+                    return data_item
+                })
+                person.data_info = dataSource
+                console.log(person.data_info.length)
+                return person
+            })
+            if (json.status === 200){
+                message.success('加载完成')
+                console.log(server_data)
+                server_data = server_data.map((value,index)=>{
+                    return Object.assign({}, value, {'key':index.toString()})
+                })
+                this.setState({
+                    data8: server_data,
+                    count: server_data.length
+                },()=>{
+                    // console.log(this.state.data8)
+                })
+            }
+            else {
+                message.error(json.err_msg)
+            }
+        })
+
     }
 
     jump(route, student){
@@ -166,18 +196,23 @@ class StudentInfo extends React.Component {
             width: '20%',
             editable: true,
             render:(text, record) =>{
+                let textColor = record.gender === 0 ? '#56BAEB' : '#D771B3'
+                let gender_icon = record.gender === 0 ? male : female
                 return (
                     <div style={{
                         display:'flex',
                         flexDirection:'row',
                         alignItems:'center'
                     }}>
-                        <img src={record.img} alt="" width='30px' height='30px' style={{borderRadius:15}}/>
+                        <img src={local_url+record.img_addr} alt="" width='30px' height='30px' style={{borderRadius:15}}/>
                         <span style={{
-                            marginLeft:10
+                            marginLeft:10,
+                            marginRight:5,
+                            color:textColor
                         }}>
                             {record.name}
                         </span>
+                        <img src={gender_icon} width='10px' height='10px'/>
                     </div>
                 )
             }
@@ -189,36 +224,41 @@ class StudentInfo extends React.Component {
             editable: true,
             // sorter: (a, b) => a.grade_index - b.grade_index,
             sorter: (a, b)=>{
-                let a_index = transform_grade(a.grade)
-                let b_index = transform_grade(b.grade)
-                return a_index - b_index
+                // let a_index = transform_grade(a.grade)
+                // let b_index = transform_grade(b.grade)
+                // return a_index - b_index
+                return a.grade - b.grade
             },
             defaultSortOrder: 'descend',
+            render:(text, record) =>{
+                return getGrade(text)
+            }
         },
         {
             title: '服务器',
-            dataIndex: 'server_id',
+            dataIndex: 'server',
             width: '40%',
             editable: true,
             render:(text, record) =>{
-                let server_info = record.server_id.map((item, index)=>{
+                // console.log(record)
+                let server_info = record.server.map((item, index)=>{
                     let colorType = 'purple'
-                    if (item.includes("20")){
-                        colorType = 'purple'
-                    }
-                    if (item.includes("40")){
-                        colorType = '#87d068'
-                    }
-                    if (item.includes("60")){
-                        colorType = '#2db7f5'
-                    }
-                    if (item.includes("80")){
-                        colorType = '#f50'
-                    }
+                    // if (item.includes("20")){
+                    //     colorType = 'purple'
+                    // }
+                    // if (item.includes("40")){
+                    //     colorType = '#87d068'
+                    // }
+                    // if (item.includes("60")){
+                    //     colorType = '#2db7f5'
+                    // }
+                    // if (item.includes("80")){
+                    //     colorType = '#f50'
+                    // }
 
                     return (
                         <Tag color={colorType}>
-                            {item}
+                            {item.name || item.host}
                         </Tag>
                     )
                 })
@@ -262,7 +302,7 @@ class StudentInfo extends React.Component {
                                 {/*<Divider type="vertical"/>*/}
                                 <a onClick={this.jump.bind(this, 'student_info/student_detail', record)}>详情</a>
                                 <Divider type="vertical"/>
-                                <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record.key)}>
+                                <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record)}>
                                 <a>删除</a>
                                 </Popconfirm>
                             </span>
@@ -332,10 +372,29 @@ class StudentInfo extends React.Component {
             ...filters,
         })
     }
-    onDelete = (key) => {
-        const arr = this.state.data8.slice()
-        this.setState({
-            data8: arr.filter(item => item.key !== key)
+    onDelete = (record) => {
+        let query_url = local_url + DEL_STUDENT
+        // let query_url = 'http://127.0.0.1:9000' + ADD_STUDENT
+        let { grade, name, stuid, key} = record
+        _fetch(query_url,
+            {
+                student:[{
+                    name,
+                    grade,
+                    stuid,
+                }]
+            }
+        ,(json)=>{
+            if (json.status === 200){
+                message.success('删除成功')
+                const arr = this.state.data8.slice()
+                this.setState({
+                    data8: arr.filter(item => item.key !== key)
+                })
+            }
+            else {
+                message.error(json.err_msg)
+            }
         })
     }
     handleAdd = () => {
@@ -344,7 +403,7 @@ class StudentInfo extends React.Component {
             key: count.toString(),
             name: `待编辑`,
             grade: `待编辑`,
-            server_id: `待编辑`,
+            server: `待编辑`,
             GitHub:'待编辑'
         };
         this.setState({
@@ -362,12 +421,12 @@ class StudentInfo extends React.Component {
             current_stu:record,
         },()=>{
             current_grade = record.grade
-            current_server_id = record.server_id
+            current_server = record.server
         });
     }
 
     save(form, key) {
-        console.log(current_server_id)
+        console.log(current_server)
         form.validateFields((error, row) => {
             if (error) {
                 return;
@@ -379,7 +438,7 @@ class StudentInfo extends React.Component {
                 newData.splice(index, 1, {
                     ...item,
                     ...row,
-                    ...{server_id:current_server_id},
+                    ...{server:current_server},
                     ...{grade:current_grade},
                 });
                 // TODO
@@ -429,15 +488,6 @@ class StudentInfo extends React.Component {
         return (
             <div>
                 <CustomBreadcrumb arr={['学生管理']}/>
-                {/*<Card bordered={false} title='远程加载数据' style={{marginBottom: 10, minHeight: 762}} id='remoteLoading'>*/}
-                {/*    <Table rowKey={record => record.login.uuid}*/}
-                {/*           loading={this.state.loading}*/}
-                {/*           dataSource={this.state.data4}*/}
-                {/*           // pagination={this.state.pagination}*/}
-                {/*           pagination={false}*/}
-                {/*           onChange={this.handleTableChange}*/}
-                {/*           columns={columns4} style={styles.tableStyle}/>*/}
-                {/*</Card>*/}
                 <Card bordered={false} title='学生列表' style={{marginBottom: 10, minHeight: 440}} id='editTable'>
                     <p>
                         <Button onClick={this.jump.bind(this, 'student_info/add_student')}>添加同学</Button>
@@ -445,7 +495,35 @@ class StudentInfo extends React.Component {
                     <Table style={styles.tableStyle} components={components}  dataSource={this.state.data8}
                            columns={columns8}
                            pagination={false}
-                           expandedRowRender={record => <Step_Chart />}/>
+                           expandedRowRender={(record) => {
+                               console.log(record)
+                               // let dataSource = []
+                               // for (let item of record.data_info){
+                               //     dataSource = dataSource.concat(item)
+                               // }
+                               // dataSource = dataSource.map((value,index)=>{
+                               //     if (typeof value.timestamp === "number"){
+                               //         value.timestamp = dateFormat('H:i:s',value.timestamp)
+                               //     }
+                               //     return value
+                               // })
+                                let source_tmp = Generate_Clus(record)
+                               return (
+                                   //<Chart_step data={record.data_info} cols={{
+                                   //    timestamp: {
+                                   //        // range: [0, 1]
+                                   //    },
+                                   //    gpu_mem:{
+                                   //        // tickCount:5, // 10 个区间
+                                   //        alias:'显存占用',
+                                   //        min: 0,
+                                   //    }
+                                   //}}
+                                   //y_name={'gpu_mem'}
+                                   ///>
+                                   <Clusteredstacked ages={source_tmp.ages} key_arr={source_tmp.key_arr} dataSource={source_tmp.dataSource} />
+                               )
+                           }} />
                 </Card>
                 <BackTop visibilityHeight={200} style={{right: 50}}/>
             </div>
