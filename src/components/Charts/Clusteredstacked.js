@@ -194,12 +194,6 @@ class Clusteredstacked extends React.Component {
                             "age",
                             chart_color
                         ]}
-                        // color={[
-                        //     "age",
-                        //     function(age) {
-                        //         return colorMap[age];
-                        //     }
-                        // ]}
                         tooltip={[
                             "age*population",
                             (age, population) => {
@@ -209,6 +203,10 @@ class Clusteredstacked extends React.Component {
                                 };
                             }
                         ]}
+                        style={{
+                            stroke: "#fff",
+                            lineWidth: 1
+                        }}
                         adjust={[
                             {
                                 type: "dodge",
@@ -220,6 +218,7 @@ class Clusteredstacked extends React.Component {
                                 type: "stack"
                             }
                         ]}
+                        size={10}
                     />
                 </Chart>
             </div>

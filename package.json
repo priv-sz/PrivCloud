@@ -39,6 +39,8 @@
     "html-to-draftjs": "^1.4.0",
     "html-webpack-plugin": "2.29.0",
     "jest": "20.0.4",
+    "less": "^3.10.3",
+    "less-loader": "^5.0.0",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
     "moment": "^2.24.0",

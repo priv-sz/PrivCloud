@@ -110,6 +110,7 @@ export let _fetch = async (url,data,resolve) =>{
         ...data
       })
     });
+
     let json  = await response.json();
     resolve(json);
   } catch(error) {
@@ -295,6 +296,7 @@ export function diff(obj1,obj2){
 
 export function getGrade(grade_index) {
   let grade = ''
+
   switch (grade_index) {
     case 0:
       grade = '研 0';
@@ -534,3 +536,5 @@ export let dateFormat = function (timestamp, formats) {
     })[matches];
   });
 };
+
+

@@ -95,6 +95,7 @@ class SiderNav extends React.Component {
 
     return (
       <div style={{height: '100vh',overflowY:'scroll'}}>
+        // TODO 添加 logo
         <div style={styles.logo}></div>
         <CustomMenu menus={menus}/>
       </div>
@@ -105,7 +106,7 @@ class SiderNav extends React.Component {
 const styles = {
   logo: {
     height: '32px',
-    background: 'rgba(255, 255, 255, .2)',
+    // background: 'rgba(255, 255, 255, .2)',
     margin: '16px'
   }
 }

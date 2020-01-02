@@ -3,9 +3,11 @@ import { Carousel, Card, BackTop, Tabs, Spin } from 'antd'
 import CustomBreadcrumb from "../../components/CustomBreadcrumb";
 import LoadableComponent from "../../utils/LoadableComponent";
 import { withRouter } from 'react-router-dom'
+
 const Step_Chart = LoadableComponent(()=>import('../../components/Charts/Step'))
 const Server_content_1 = LoadableComponent(()=>import('./server_content_1'))
 const Server_content_2 = LoadableComponent(()=>import('./server_content_2'))
+const Server_content_3 = LoadableComponent(()=>import('./server_content_3'))
 const { TabPane } = Tabs;
 
 @withRouter
@@ -39,11 +41,14 @@ class Server_detail extends React.Component {
                 <Card bordered={false} title='服务器详情'  >
                     <Tabs defaultActiveKey='1' tabPosition={'left'}
                           style={{height: 'auto' ,}}>
-                        <TabPane tab="服务器配置" key="1" >
+                        <TabPane tab="服务器信息" key="1" >
+                            <Server_content_2 server_info={this.props.location.state} />
+                        </TabPane>
+                        <TabPane tab="服务器配置" key="2" >
                             <Server_content_1 server_info={this.props.location.state}/>
                         </TabPane>
-                        <TabPane tab="服务器信息" key="2" >
-                            <Server_content_2 server_info={this.props.location.state} />
+                        <TabPane tab="服务器管理配置" key="3" >
+                            <Server_content_3 server_info={this.props.location.state}/>
                         </TabPane>
                     </Tabs>
                 </Card>

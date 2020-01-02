@@ -132,7 +132,6 @@ class Server_content_1 extends React.Component {
         })(
             <Select style={{width: 70}}>
                 <Option value={86}>+86</Option>
-                <Option value={87}>+87</Option>
             </Select>
         );
         return (

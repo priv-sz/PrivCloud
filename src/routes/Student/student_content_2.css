@@ -1,0 +1,54 @@
+/*td.ant-descriptions-item-content.education_experience {*/
+/*    padding: 0px;*/
+/*}*/
+
+/*
+教育经历 table padding
+*/
+.student_content_2 .education_experience{
+    padding: 0px;
+}
+
+/*
+textArea 边框
+*/
+.student_content_2 .student_2_form_testArea{
+    border-style: none;
+}
+
+/*
+Form 下 input 框
+*/
+.student_content_2 .ant-input[disabled] {
+    background-color: #ffffff;
+    color:#000000;
+}
+
+/*
+ range picker 输入框
+*/
+.student_content_2 .ant-input-disabled{
+    background-color: #ffffff;
+}
+
+/*
+ 修改 FormItem text line-height 未适配
+*/
+
+.student_content_2 .ant-form-item-control {
+    line-height: 50px;
+}
+
+/*
+ 修改 FormItem marginBottom
+*/
+.student_content_2 .ant-row.ant-form-item{
+    margin-bottom: 0px;
+}
+
+/*
+  简历大表 表头竖行文字排列
+*/
+.student_content_2 th{
+    vertical-align:middle;
+}

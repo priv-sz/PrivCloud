@@ -1,7 +1,7 @@
 import React from 'react'
 import {
     Card, Popconfirm, Button, Icon, Table, Divider, BackTop, Affix, Anchor, Form, InputNumber, Input, Select,
-    Cascader, Tag, message
+    Cascader, Tag, message, Tabs
 } from 'antd'
 import axios from 'axios'
 import male from '../../assets/icon/Male.ico'
@@ -10,18 +10,19 @@ import CustomBreadcrumb from '../../components/CustomBreadcrumb/index'
 import TypingCard from '../../components/TypingCard'
 import { person } from '../../data/person'
 import { server_arr, grade_arr } from '../../data/general'
-import {_fetch, transform_grade, getGrade, dateFormat, deepCopy} from '../../utils/utils'
+import {_fetch, transform_grade, getGrade, dateFormat, deepCopy, timestamp2Date} from '../../utils/utils'
 import LoadableComponent from '../../utils/LoadableComponent'
 
 import person_tmp from '../../assets/icon/gtx.jpg'
-import {ADD_STUDENT, ALL_STUDENT, DEL_SERVER, DEL_STUDENT, HOST} from "../../utils/url_config";
+import {ADD_STUDENT, ALL_STUDENT, DEL_SERVER, DEL_STUDENT, HOST, ONE_DAY} from "../../utils/url_config";
 import { Generate_Clus } from '../../components/Charts/Generate_chart'
 
 
-const Chart_step = LoadableComponent(()=>import('../../components/Charts/Step'))
 const Clusteredstacked = LoadableComponent(()=>import('../../components/Charts/Clusteredstacked'))
+const Chart_step = LoadableComponent(()=>import('../../components/Charts/Student_Chart_server'))
 
 const { Option } = Select;
+const { TabPane } = Tabs;
 
 let current_grade = ''
 let current_server = ''
@@ -132,7 +133,93 @@ class StudentInfo extends React.Component {
           }
 
           this.jump = this.jump.bind(this)
+          this._onOk_24 = this._onOk_24.bind(this)
       }
+
+    _onOk_24(date, state_key, query_ip){
+
+        if (date === null){
+            return
+        }
+
+        let timestamp = date
+        let query_url = HOST() + ONE_DAY
+        let mess_load = message.loading('查询中', 0);
+        _fetch(query_url,{
+            timestamp:timestamp,
+            ip_list:[query_ip]
+        },(json)=>{
+            mess_load()
+            if (json.status === 200){
+                console.log(json.err_msg)
+
+                let chart_data = json.err_msg[0].data_info.map((value, index)=>{
+                    let value_tmp = Object.assign({},value)
+                    console.log(value_tmp)
+                    if (Object.keys(value).length !== 0){
+                        // value 字段表示 显存
+                        value.value = 0
+                        value.temperature = 0
+                        value.timestamp = timestamp2Date('H:i',value.timestamp)
+                        if (value.gpu_info.length > 0){
+                            let reduceStruct = value.gpu_info.reduce((initValue, item)=>{
+                                return {
+                                    usedMemry:initValue.usedMemry + item.usedMemry,
+                                    percent:initValue.percent + item.percent,
+                                    temp: initValue.temp + item.temp
+                                }
+                            },{ usedMemry:0, percent: 0 , temp: 0})
+                            value.value = Math.round(reduceStruct.usedMemry/(1024*1024))
+                            value.temperature = Math.round(reduceStruct.temp)
+                            value.GPU_use_percent = reduceStruct.percent
+                        }
+                    }
+                    return value
+                })
+                // 倒叙
+                // chart_data = chart_data.reverse()
+                console.log(chart_data)
+                let max_gpu = 8
+                let fields = []
+                chart_data = chart_data.map((value, index)=>{
+                    // value.gpu_totalMemry = value.gpu_info[0].totalMemry*value.gpu_info.length / 1024 / 1024
+                    // 平均值
+                    value.gpu_totalMemry = Math.round(value.gpu_info[0].totalMemry*value.gpu_info.length / 1024 / 1024 / value.gpu_info.length)
+                    if (index === 0){
+                        max_gpu = value.gpu_totalMemry
+                    }
+                    // 平均值
+                    value.temperature = Math.round(value.temperature / value.gpu_info.length)
+                    value.GPU_use_percent = Math.round(value.GPU_use_percent / value.gpu_info.length)
+                    value.gpu_value = Math.round(value.value / value.gpu_info.length)
+                    for (let gpu of value.gpu_info){
+                        value[[gpu.fan]] = `${Math.round(gpu.usedMemry / 1024 / 1024)}Mib (${gpu.name} 显存:${Math.round(gpu.usedMemry / 1024 / 1024)}Mib,显卡占用率:${gpu.percent}%,温度:${gpu.temp}℃)`
+                        if ( index === 0 ){
+                            fields.push(gpu.fan)
+                        }
+                    }
+                    return value
+                })
+                console.log(chart_data)
+                fields = fields.reverse()
+                fields = fields.map((value, index)=>{
+                    return value.toString()
+                })
+                this.setState({
+                    [state_key]:{
+                        chart_data,
+                        max_gpu,
+                        fields
+                    }
+                },()=>{
+                    console.log(this.state)
+                })
+            }
+            else {
+                console.log(json.err_msg)
+            }
+        })
+    }
 
     componentDidMount() {
         this.getRemoteData()
@@ -140,8 +227,10 @@ class StudentInfo extends React.Component {
 
     componentWillMount() {
         let query_url = HOST() + ALL_STUDENT
+
         _fetch(query_url,{},(json)=>{
             let server_data = json.err_msg
+            console.log(server_data)
             server_data = server_data.map((person, person_i)=>{
                 let dataSource = []
                 for (let item of person.data_info){
@@ -150,10 +239,8 @@ class StudentInfo extends React.Component {
                 dataSource = dataSource.sort((a,b)=>{
                     return a.timestamp-b.timestamp
                 })
-                console.log('********')
-                console.log(person.name)
                 dataSource = dataSource.map((data_item, data_item_i)=>{
-                    console.log(data_item.timestamp)
+                    // console.log(data_item.timestamp)
                     // 时间戳转换 在 chart data 赋值里做
                     // if (typeof data_item.timestamp === "number"){
                     //     data_item.timestamp = dateFormat(data_item.timestamp*1000,'m-d H:i:s')
@@ -174,7 +261,7 @@ class StudentInfo extends React.Component {
                     data8: server_data,
                     count: server_data.length
                 },()=>{
-                    // console.log(this.state.data8)
+                    console.log(this.state.data8)
                 })
             }
             else {
@@ -185,15 +272,16 @@ class StudentInfo extends React.Component {
     }
 
     jump(route, student){
-        console.log(route)
-        this.props.history.push(route)
+        student = student || {}
+        this.props.history.push(route, student)
     }
 
     columns8 = [
         {
             title: '姓名',
             dataIndex: 'name',
-            width: '20%',
+            // width: '20%',
+            width: '15%',
             editable: true,
             render:(text, record) =>{
                 let textColor = record.gender === 0 ? '#56BAEB' : '#D771B3'
@@ -220,7 +308,8 @@ class StudentInfo extends React.Component {
         {
             title: '年级',
             dataIndex: 'grade',
-            width: '20%',
+            // width: '20%',
+            width: '10%',
             editable: true,
             // sorter: (a, b) => a.grade_index - b.grade_index,
             sorter: (a, b)=>{
@@ -235,9 +324,24 @@ class StudentInfo extends React.Component {
             }
         },
         {
+            title: '学号',
+            dataIndex:'stuid',
+        },
+        {
+            title: '电话',
+            dataIndex:'phone',
+        },
+        {
+            title: 'github',
+            dataIndex:'github',
+            render:(text, record) => {
+                return <a href={`https://github.com/${text}`} target="_Blank"> {text} </a>
+            }
+        },
+        {
             title: '服务器',
             dataIndex: 'server',
-            width: '40%',
+            width: '25%',
             editable: true,
             render:(text, record) =>{
                 // console.log(record)
@@ -300,6 +404,7 @@ class StudentInfo extends React.Component {
                             <span>
                                 {/*<a onClick={() => this.edit(record)}>编辑</a>*/}
                                 {/*<Divider type="vertical"/>*/}
+                                {/*<a onClick={this.jump.bind(this, 'student_info/student_detail', record)}>详情</a>*/}
                                 <a onClick={this.jump.bind(this, 'student_info/student_detail', record)}>详情</a>
                                 <Divider type="vertical"/>
                                 <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record)}>
@@ -376,6 +481,7 @@ class StudentInfo extends React.Component {
         let query_url = local_url + DEL_STUDENT
         // let query_url = 'http://127.0.0.1:9000' + ADD_STUDENT
         let { grade, name, stuid, key} = record
+
         _fetch(query_url,
             {
                 student:[{
@@ -485,43 +591,84 @@ class StudentInfo extends React.Component {
             };
         });
 
+
+
         return (
             <div>
                 <CustomBreadcrumb arr={['学生管理']}/>
                 <Card bordered={false} title='学生列表' style={{marginBottom: 10, minHeight: 440}} id='editTable'>
                     <p>
-                        <Button onClick={this.jump.bind(this, 'student_info/add_student')}>添加同学</Button>
+                        <Button onClick={this.jump.bind(this, 'student_info/add_student', {})}>添加同学</Button>
                     </p>
                     <Table style={styles.tableStyle} components={components}  dataSource={this.state.data8}
                            columns={columns8}
                            pagination={false}
                            expandedRowRender={(record) => {
                                console.log(record)
-                               // let dataSource = []
-                               // for (let item of record.data_info){
-                               //     dataSource = dataSource.concat(item)
-                               // }
-                               // dataSource = dataSource.map((value,index)=>{
-                               //     if (typeof value.timestamp === "number"){
-                               //         value.timestamp = dateFormat('H:i:s',value.timestamp)
-                               //     }
-                               //     return value
-                               // })
-                                let source_tmp = Generate_Clus(record)
+                               // TODO 这里的逻辑是用 server 平均值做的, 重构要改成user 平均值, 先要改后台接口
+
+                                // let source_tmp = Generate_Clus(record)
+                               // return (
+                               //     <Clusteredstacked ages={source_tmp.ages} key_arr={source_tmp.key_arr} dataSource={source_tmp.dataSource} />
+                               // )
+
+                               let data = {}
+                               let max_gpu = {}
+                               let fields = {}
+
+                               for (let server of record.server){
+                                   let date = Math.round(new Date().getTime() /1000)
+                                   let query_ip = server.host
+                                   let state_key = `${query_ip}_expanded`
+
+                                   if (this.state.hasOwnProperty(state_key)){
+                                       data[[server.host]] = this.state[[state_key]].chart_data
+                                       max_gpu[[server.host]] = this.state[[state_key]].max_gpu
+                                       fields[[server.host]] = this.state[[state_key]].fields
+                                   }else {
+                                       this._onOk_24(date, state_key, query_ip)
+                                   }
+                               }
+
+                               let expandedComponent = record.server.map((value, index)=>{
+                                   let query_ip = value.host
+                                   let state_key = `${query_ip}_expanded`
+                                   return (
+                                       <TabPane tab={value.host} key={index} >
+                                           {
+                                               this.state.hasOwnProperty(state_key) ?
+                                                   <Chart_step data={data[[query_ip]]} cols={{
+                                                       temperature: {
+                                                           alias:'温度',
+                                                           type: 'linear',
+                                                           min: 0,
+                                                           max:100,
+                                                       },
+                                                       gpu_value:{
+                                                           alias:'平均显存占用',
+                                                           min: 0,
+                                                           max: max_gpu[[query_ip]]
+                                                       },
+                                                       GPU_use_percent:{
+                                                           alias:'GPU利用率',
+                                                           type: 'linear',
+                                                           min: 0,
+                                                           max:100,
+                                                       }
+                                                   }}
+                                                               fields={fields[[query_ip]]}
+                                                               height={343}/> :
+                                                   null
+                                           }
+                                       </TabPane>
+                                   )
+                               })
+
                                return (
-                                   //<Chart_step data={record.data_info} cols={{
-                                   //    timestamp: {
-                                   //        // range: [0, 1]
-                                   //    },
-                                   //    gpu_mem:{
-                                   //        // tickCount:5, // 10 个区间
-                                   //        alias:'显存占用',
-                                   //        min: 0,
-                                   //    }
-                                   //}}
-                                   //y_name={'gpu_mem'}
-                                   ///>
-                                   <Clusteredstacked ages={source_tmp.ages} key_arr={source_tmp.key_arr} dataSource={source_tmp.dataSource} />
+                                   <Tabs defaultActiveKey={0} tabPosition={'left'}
+                                         style={{height: 'auto' ,}}>
+                                       {expandedComponent}
+                                   </Tabs>
                                )
                            }} />
                 </Card>

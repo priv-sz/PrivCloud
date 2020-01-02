@@ -3,12 +3,13 @@ import {Card, Upload, Tooltip, Icon, Form, Checkbox, Select, Input, Button, Col,
     Spin, Modal, Radio} from 'antd'
 import CustomBreadcrumb from '../../components/CustomBreadcrumb/index'
 import TypingCard from '../../components/TypingCard'
-import {HOST, ADD_STUDENT, ALL_SERVER, UPLOAD_IMG_TMP} from '../../utils/url_config'
-import {_fetch, match_obj} from "../../utils/utils"
+import {HOST, ADD_STUDENT, ALL_SERVER, UPLOAD_IMG_TMP, EDI_STUDENT} from '../../utils/url_config'
+import {_fetch, match_obj } from "../../utils/utils"
 
 const FormItem = Form.Item
 const Option = Select.Option
 
+let local_url = HOST()
 
 function getBase64(img, callback) {
     const reader = new FileReader();
@@ -18,19 +19,50 @@ function getBase64(img, callback) {
 
 
 @Form.create()
-class Server_add extends React.Component {
+class Server_content_1 extends React.Component {
     // 构造
-      constructor(props) {
+    constructor(props) {
         super(props);
         // 初始状态
         this.state = {
             text: '获取验证码',
             disabled: false,
             loading: false,
-            server:[]
+            server:[],
+            imageUrl:undefined,
+            student_info:{
+
+            },
         };
         this.server_struct = {}
-      }
+        this._generateStuInfo = this._generateStuInfo.bind(this)
+    }
+
+    _generateStuInfo(dataSource) {
+        let { name, gender, grade, stuid, phone, server, img_addr, github, email } = dataSource
+        let server_list = server.map((value, index)=>{
+            return value.host
+        })
+        let server_user = 'user'
+        let server_pwd = 'priv123'
+        if (server.length > 0){
+            server_user = server[0].user
+            server_pwd = server[0].pwd
+        }
+        this.show_info = {
+            name, gender, grade, stuid, phone,  img_addr, github, email,
+            server :server_list,
+            // user :server[0].user,
+            // pwd : server[0].pwd
+            user:server_user,
+            pwd:server_pwd
+        }
+        this.setState({
+            imageUrl:local_url+img_addr,
+            student_info:this.show_info
+        })
+        console.log(this.show_info)
+    }
 
     beforeUpload(file, fileList) {
         const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
@@ -70,8 +102,9 @@ class Server_add extends React.Component {
                 console.log(err)
                 message.warning('请先填写正确的表单')
             } else {
-                let query_url = HOST() + ADD_STUDENT
-                // let query_url = 'http://127.0.0.1:9000' + ADD_STUDENT
+                let { name, gender, grade, stuid, phone, github, email } = values
+                let query_url = local_url + EDI_STUDENT
+                // let query_url = 'http://127.0.0.1:9000' + EDI_STUDENT
                 let server = values.server.map((value, index)=>{
                     // console.log(this.server_struct)
                     // console.log(this.server_struct[value])
@@ -82,42 +115,34 @@ class Server_add extends React.Component {
                         pwd:values.pwd,
                     }
                 })
+
+                let new_data = {
+                    name, gender, grade, stuid, phone, github, server, email,
+                    img_addr: this.state.imageUrl
+                }
+
                 console.log({
                     name:values.name,
+                    stuid:values.stuid,
                     grade:values.grade,
                     gender:values.gender,
                     github:values.github,
                     phone:values.phone,
                     server:server,
-                    email:values.email,
                     img_addr:this.state.imageUrl
                 })
 
-                // TODO 这里初始化 简历模板 生成三个元素的数组
-                let educationExperience = []
-                for (let i=0; i<3;i++){
-                    educationExperience.push({
-                        education_time: '',
-                        education_school: '',
-                        education_speciality: '',
-                        education_education: '',
-                    })
-                }
 
                 this.setState({
                     loading: true
                 },()=>{
                     _fetch(query_url,{
-                        name:values.name,
-                        grade:values.grade,
-                        gender:values.gender,
-                        github:values.github,
-                        phone:values.phone,
-                        server:server,
-                        img_addr:this.state.imageUrl,
-                        stuid:values.stuid,
-                        email:values.email,
-                        educationExperience
+                        old_data:{
+                            name:this.show_info.name,
+                            grade:this.show_info.grade,
+                            stuid:this.show_info.stuid,
+                        },
+                        new_data
                     },(json)=>{
                         console.log(json)
                         this.setState({
@@ -125,6 +150,9 @@ class Server_add extends React.Component {
                         },()=>{
                             if (json.status === 200){
                                 message.success('提交成功')
+                                // 更新 show_info
+                                this._generateStuInfo(json.err_msg)
+                                this.props.changeStudnetInfo(this.show_info)
                             }
                             else {
                                 message.error(json.err_msg)
@@ -141,6 +169,10 @@ class Server_add extends React.Component {
     }
 
     componentWillMount() {
+
+        console.log(this.props.student_info)
+        this._generateStuInfo(this.props.student_info)
+
         let query_url = HOST() + ALL_SERVER
         _fetch(query_url, {
         }, (json)=>{
@@ -163,12 +195,16 @@ class Server_add extends React.Component {
         })
     }
 
+    componentWillReceiveProps(nextProps, nextContext) {
+        let {student_info} = nextProps;
+        this._generateStuInfo(student_info)
+    }
     render() {
         // config_server
         let { server } = this.state || []
         server = server.map((value, index)=>{
             return (
-                <Option value={value.host}>{value.name}</Option>
+                <Option key={`select_server_${index}`} value={value.host}>{value.name}</Option>
             )
         })
 
@@ -209,11 +245,11 @@ class Server_add extends React.Component {
         })(
             <Select style={{width: 70}}>
                 <Option value={86}>+86</Option>
-                <Option value={87}>+87</Option>
             </Select>
         );
 
         const Upload_img = getFieldDecorator('upload_img', {
+            initialValue:this.state.imageUrl,
             rules: [
                 {
                     required: true,
@@ -241,7 +277,6 @@ class Server_add extends React.Component {
 
         return (
             <div >
-                <CustomBreadcrumb arr={[{title:'学生管理', to:'/student_info'}, '添加学生']}/>
                 <Spin spinning={this.state.loading}>
                     <Card bordered={false} title='学生配置'>
                         <Form layout='horizontal' style={{width: '70%', margin: '0 auto'}} onSubmit={this.handleSubmit}>
@@ -252,6 +287,7 @@ class Server_add extends React.Component {
                             )}>
                                 {
                                     getFieldDecorator('name', {
+                                        initialValue:this.state.student_info.name,
                                         rules: [
                                             {
                                                 required: true,
@@ -271,7 +307,8 @@ class Server_add extends React.Component {
                             )}>
                                 {
                                     getFieldDecorator('gender', {
-                                        initialValue:0,
+                                        // initialValue:this.show_info.gender,
+                                        initialValue:this.state.student_info.gender,
                                         rules: [
                                             {
                                                 required: true,
@@ -289,6 +326,7 @@ class Server_add extends React.Component {
                             <FormItem label='年级' {...formItemLayout} required>
                                 {
                                     getFieldDecorator('grade', {
+                                        initialValue:this.state.student_info.grade,
                                         rules: [
                                         ],
                                     })(
@@ -310,6 +348,7 @@ class Server_add extends React.Component {
                             <FormItem label='学号' {...formItemLayout}>
                                 {
                                     getFieldDecorator('stuid', {
+                                        initialValue:this.state.student_info.stuid,
                                         rules: [
                                             {
                                                 pattern: /^[0-9]+$/,
@@ -325,12 +364,17 @@ class Server_add extends React.Component {
                             <FormItem label='电话' {...formItemLayout}>
                                 {
                                     getFieldDecorator('phone', {
+                                        initialValue:this.state.student_info.phone,
                                         rules: [
                                             {
                                                 len: 11,
                                                 pattern: /^[1][3,4,5,7,8][0-9]{9}$/,
                                                 // required: true,
                                                 message: '请输入正确的11位手机号码'
+                                            },
+                                            {
+                                                required: true,
+                                                message: '请填写电话'
                                             }
                                         ]
                                     })(
@@ -341,6 +385,7 @@ class Server_add extends React.Component {
                             <FormItem label='邮箱' {...formItemLayout}>
                                 {
                                     getFieldDecorator('email', {
+                                        initialValue:this.state.student_info.email || "orangels0313@gmail.com",
                                         rules: [
                                             {
                                                 type: 'email',
@@ -359,6 +404,7 @@ class Server_add extends React.Component {
                             <FormItem label='github 昵称' {...formItemLayout}>
                                 {
                                     getFieldDecorator('github', {
+                                        initialValue:this.state.student_info.github,
                                         rules: [
 
                                         ]
@@ -370,6 +416,7 @@ class Server_add extends React.Component {
                             <FormItem label='服务器' {...formItemLayout} required>
                                 {
                                     getFieldDecorator('server', {
+                                        initialValue:this.state.student_info.server,
                                         rules: [
                                         ],
                                     })(
@@ -382,6 +429,7 @@ class Server_add extends React.Component {
                             <FormItem label='账号' {...formItemLayout}>
                                 {
                                     getFieldDecorator('user', {
+                                        initialValue:this.state.student_info.user,
                                         rules: [
                                             // {
                                             //     whitespace: true,
@@ -404,6 +452,7 @@ class Server_add extends React.Component {
                             <FormItem label='密码' {...formItemLayout}>
                                 {
                                     getFieldDecorator('pwd', {
+                                        initialValue:this.state.student_info.pwd,
                                         rules: [
                                             {
                                                 required: true,
@@ -461,7 +510,7 @@ class Server_add extends React.Component {
                                 )}
                             </FormItem>
                             <FormItem style={{textAlign: 'center'}} {...tailFormItemLayout}>
-                                <Button type="primary" htmlType="submit" disabled={!getFieldValue('agreement')}>提交</Button>
+                                <Button type="primary" htmlType="submit" disabled={!getFieldValue('agreement')}>修改</Button>
                             </FormItem>
                         </Form>
                     </Card>
@@ -472,4 +521,4 @@ class Server_add extends React.Component {
     }
 }
 
-export default Server_add
+export default Server_content_1

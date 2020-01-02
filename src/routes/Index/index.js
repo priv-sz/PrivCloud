@@ -36,7 +36,7 @@ class Index extends React.Component{
             <Content>
               <ContentMain/>
             </Content>
-            <Footer style={{textAlign: 'center'}}>Priv-Admin ©2019 Created by Priv </Footer>
+            <Footer style={{textAlign: 'center'}}>LaMer ©2019 Created by Priv </Footer>
           </Layout>
         </Layout>
       </div>

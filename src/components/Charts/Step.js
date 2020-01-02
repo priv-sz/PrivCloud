@@ -167,7 +167,7 @@ class Step extends React.Component {
     }
 
     render() {
-
+        console.log(this.state.data)
         return (
             <div>
                 <Chart height={this.props.height || 400} data={this.state.data} scale={this.state.cols} forceFit>

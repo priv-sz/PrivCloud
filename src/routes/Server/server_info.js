@@ -6,7 +6,7 @@ import {
 import axios from 'axios'
 import CustomBreadcrumb from '../../components/CustomBreadcrumb/index'
 import TypingCard from '../../components/TypingCard'
-import { servers } from '../../data/server'
+import { tag_info } from './server_info_data'
 import {HOST, DEL_SERVER, ALL_SERVER, EDI_SERVER} from '../../utils/url_config'
 import {_fetch} from "../../utils/utils";
 import LoadableComponent from '../../utils/LoadableComponent'
@@ -128,8 +128,10 @@ class ServerInfo extends React.Component {
               count: data8.length,
               data8,
               editingKey: '',
+              tagMode: 0
           }
           this.handleAdd = this.handleAdd.bind(this)
+          this.tagModeChanged = this.tagModeChanged.bind(this)
       }
 
     componentWillMount() {
@@ -166,6 +168,15 @@ class ServerInfo extends React.Component {
             dataIndex: 'host',
             width: '12%',
             editable: true,
+            sorter: (a, b)=>{
+                let host_a_arr = a.host.split('.')
+                let host_a = Number(host_a_arr[host_a_arr.length-1])
+
+                let host_b_arr = b.host.split('.')
+                let host_b = Number(host_b_arr[host_b_arr.length-1])
+                return host_a-host_b
+            },
+            defaultSortOrder: 'ascend',
         },
         {
             title: 'GPU信息',
@@ -173,9 +184,28 @@ class ServerInfo extends React.Component {
             width: '60%',
             render:(text, record) =>{
                 if (record.data_info.length > 0){
+                    // console.log(record)
                     let gpu_info = record['data_info'][0]['gpu_info'].map((info, index)=>{
-                        let tag_type = info.usedMemry/info.totalMemry
-                        if (tag_type > 0 && tag_type <= 0.25) tag_type = 'purple'
+                        let tag_type = 0
+                        switch (this.state.tagMode) {
+                            case 0:
+                                // 显存占用
+                                tag_type = info.usedMemry/info.totalMemry;
+                                break;
+                            case 1:
+                                // 温度
+                                tag_type = info.temp/ 100;
+                                break;
+                            case 2:
+                                // gpu 利用率
+                                tag_type = info.percent/ 100;
+                                break;
+                            default:
+                                tag_type = info.usedMemry/info.totalMemry
+                                break;
+                        }
+
+                        if (tag_type >= 0 && tag_type <= 0.25) tag_type = 'purple'
                         else if (tag_type > 0.25 && tag_type <= 0.5) tag_type = '#87d068'
                         else if (tag_type > 0.5 && tag_type <= 0.75) tag_type = '#2db7f5'
                         else if (tag_type > 0.75 ) tag_type = "#f50"
@@ -186,12 +216,13 @@ class ServerInfo extends React.Component {
                                         <p>{`显卡${info.fan}`}</p>
                                         <p>{`总显存:${Math.round(info.totalMemry/(1024*1024))}MiB`}</p>
                                         <p>{`已用显存:${Math.round(info.usedMemry/(1024*1024))}MiB`}</p>
+                                        <p>{`显存利用率:${info.percent}%`}</p>
                                         <p>{`温度:${info.temp}℃`}</p>
                                         <p>{`功耗:${info.power}`}</p>
                                     </div>
                                 )
                             }}>
-                                <Tag color={tag_type}>
+                                <Tag color={tag_type} style={{marginTop: 5, marginBottom:5}}>
                                     {info.name.split(' ').slice(0, 3).join(' ')}
                                 </Tag>
                             </Tooltip>
@@ -340,6 +371,13 @@ class ServerInfo extends React.Component {
     handleAdd() {
         this.props.history.push('/server_info/add_server')
     }
+
+    tagModeChanged(value){
+        this.setState({
+            tagMode:value
+        })
+    }
+
     isEditing = (record) => {
         return record.key === this.state.editingKey;
     };
@@ -421,17 +459,22 @@ class ServerInfo extends React.Component {
                     <p>
                         <Button onClick={this.handleAdd}>添加服务器</Button>
                         <Tag color={"#f50"} style={{marginLeft:20}}>
-                            75%以上
+                            {tag_info[this.state.tagMode][0]}
                         </Tag>
                         <Tag color={'#2db7f5'}>
-                            50%以上
+                            {tag_info[this.state.tagMode][1]}
                         </Tag>
                         <Tag color={'#87d068'}>
-                            25%以上
+                            {tag_info[this.state.tagMode][2]}
                         </Tag>
                         <Tag color={"purple"}>
-                            0以上
+                            {tag_info[this.state.tagMode][3]}
                         </Tag>
+                        <Select defaultValue={0} onChange={this.tagModeChanged} style={{ width: 120 }}>
+                            <Option value={0}>显存</Option>
+                            <Option value={1}>温度</Option>
+                            <Option value={2}>GPU 利用率</Option>
+                        </Select>
                     </p>
 
                     <Table style={styles.tableStyle} components={components}  dataSource={this.state.data8}
@@ -441,7 +484,7 @@ class ServerInfo extends React.Component {
                                let show_component = record.data_info[0].gpu_info.map((info, index)=>{
 
                                    let tag_type = info.usedMemry/info.totalMemry
-                                   if (tag_type > 0 && tag_type <= 0.25) tag_type = 'purple'
+                                   if (tag_type >= 0 && tag_type <= 0.25) tag_type = 'purple'
                                    else if (tag_type > 0.25 && tag_type <= 0.5) tag_type = '#87d068'
                                    else if (tag_type > 0.5 && tag_type <= 0.75) tag_type = '#2db7f5'
                                    else if (tag_type > 0.75 ) tag_type = "#f50"
