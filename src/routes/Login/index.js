@@ -25,8 +25,10 @@ class Login extends React.Component {
   }
 
   componentDidMount () {
-    const isLogin = this.props.appStore
+    const isLogin = this.props.appStore.isLogin
+    console.log(isLogin)
     if(isLogin){
+      console.log('login 跳转')
       this.props.history.go(1)     //当浏览器用后退按钮回到登录页时，判断登录页是否登录，是登录就重定向上个页面
       // this.props.appStore.toggleLogin(false) //也可以设置退出登录
     }
@@ -92,9 +94,9 @@ class Login extends React.Component {
                 <LoginForm
                   className={showBox === 'login' ? 'box showBox' : 'box hiddenBox'}
                   switchShowBox={this.switchShowBox}/>
-                <RegisterForm
-                  className={showBox === 'register' ? 'box showBox' : 'box hiddenBox'}
-                  switchShowBox={this.switchShowBox}/>
+                {/*<RegisterForm*/}
+                {/*  className={showBox === 'register' ? 'box showBox' : 'box hiddenBox'}*/}
+                {/*  switchShowBox={this.switchShowBox}/>*/}
               </div>
             </div>
         }

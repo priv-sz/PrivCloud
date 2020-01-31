@@ -330,12 +330,25 @@ class StudentInfo extends React.Component {
         {
             title: '电话',
             dataIndex:'phone',
+            render:(text,record) => {
+                return (
+                    <a>
+                        <Icon type="phone" theme="twoTone" style={{marginRight:10}}/>
+                        {text}
+                    </a>
+                )
+            }
         },
         {
             title: 'github',
             dataIndex:'github',
             render:(text, record) => {
-                return <a href={`https://github.com/${text}`} target="_Blank"> {text} </a>
+                return (
+                    <a href={`https://github.com/${text}`} target="_Blank">
+                        <Icon type="github" theme="filled" style={{marginRight:10}}/>
+                        {text}
+                    </a>
+                )
             }
         },
         {
@@ -408,7 +421,7 @@ class StudentInfo extends React.Component {
                                 <a onClick={this.jump.bind(this, 'student_info/student_detail', record)}>详情</a>
                                 <Divider type="vertical"/>
                                 <Popconfirm title="Sure to delete?" onConfirm={() => this.onDelete(record)}>
-                                <a>删除</a>
+                                    <a>删除</a>
                                 </Popconfirm>
                             </span>
                         )}

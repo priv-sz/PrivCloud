@@ -240,7 +240,7 @@ class Student_Chart_server extends React.Component {
                     <Axis
                         name="temperature"
                         label={{
-                            offset:1,
+                            offset:0,
                             formatter(text, item, index) {
                                 return `${text}℃`;
                             },
@@ -305,7 +305,7 @@ class Student_Chart_server extends React.Component {
                             "gpu*value",
                             (age, value) => {
                                 return {
-                                    name: `${age}卡`,
+                                    name: `${age}`,
                                     value: `${value} `
                                 };
                             }

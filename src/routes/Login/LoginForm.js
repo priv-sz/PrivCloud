@@ -1,10 +1,12 @@
 import React from 'react'
-import { randomNum, calculateWidth } from '../../utils/utils'
+import {randomNum, calculateWidth, _fetch} from '../../utils/utils'
 import { withRouter } from 'react-router-dom'
 import { inject, observer } from 'mobx-react/index'
-import { Form, Input, Row, Col } from 'antd'
+import {Form, Input, Row, Col, message} from 'antd'
 import PromptBox from '../../components/PromptBox'
+import {HOST, USER_LOGIN} from "../../utils/url_config";
 
+let local_url = HOST()
 
 @withRouter @inject('appStore') @observer @Form.create()
 class LoginForm extends React.Component {
@@ -68,35 +70,56 @@ class LoginForm extends React.Component {
           return
         }
 
-        const users = this.props.appStore.users
-        console.log(users)
-        // 检测用户名是否存在
-        const result = users.find(item => item.username === values.username)
-        if (!result) {
-          this.props.form.setFields({
-            username: {
-              value: values.username,
-              errors: [new Error('用户名不存在')]
-            }
-          })
-          return
-        } else {
-          //检测密码是否错误
-          if (result.password !== values.password) {
-            this.props.form.setFields({
-              password: {
-                value: values.password,
-                errors: [new Error('密码错误')]
-              }
-            })
+        // const users = this.props.appStore.users
+        // // 检测用户名是否存在
+        // const result = users.find(item => item.username === values.username)
+        // if (!result) {
+        //   this.props.form.setFields({
+        //     username: {
+        //       value: values.username,
+        //       errors: [new Error('用户名不存在')]
+        //     }
+        //   })
+        //   return
+        // } else {
+        //   //检测密码是否错误
+        //   if (result.password !== values.password) {
+        //     this.props.form.setFields({
+        //       password: {
+        //         value: values.password,
+        //         errors: [new Error('密码错误')]
+        //       }
+        //     })
+        //     return
+        //   }
+        // }
+
+        // this.props.appStore.toggleLogin(true, {username: values.username})
+        // const {from} = this.props.location.state || {from: {pathname: '/'}}
+        // this.props.history.push(from)
+
+        // 网络请求 登录
+
+        // ls change
+
+        let query_url = local_url + USER_LOGIN
+        _fetch(query_url, {
+          name:values.username,
+          password:values.password,
+        },(json)=>{
+          if (json.status === 200){
+            console.log('登录成功')
+            this.props.appStore.toggleLogin(true, {username: values.username})
+            const {from} = this.props.location.state || {from: {pathname: '/'}}
+            this.props.history.push(from)
+          }
+          else {
+            console.log(json.err_msg)
+            message.error('登录失败, 账号或密码错误')
             return
           }
-        }
+        });
 
-        this.props.appStore.toggleLogin(true, {username: values.username})
-
-        const {from} = this.props.location.state || {from: {pathname: '/'}}
-        this.props.history.push(from)
       }
     })
   }
@@ -173,7 +196,7 @@ class LoginForm extends React.Component {
           </Form.Item>
           <div className='bottom'>
             <input className='loginBtn' type="submit" value='登录'/>
-            <span className='registerBtn' onClick={this.register}>注册</span>
+            {/*<span className='registerBtn' onClick={this.register}>注册</span>*/}
           </div>
         </Form>
         <div className='footer'>

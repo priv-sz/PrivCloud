@@ -85,7 +85,7 @@ const menus = [
   {
     title: '关于',
     icon: 'info-circle-o',
-    key: '/home/about'
+    key: '/about'
   }
 ]
 

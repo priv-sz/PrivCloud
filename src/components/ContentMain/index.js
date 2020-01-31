@@ -19,9 +19,23 @@ const StudentInfo = LoadableComponent(()=>import('../../routes/Student/student_i
 const StudentDetail = LoadableComponent(()=>import('../../routes/Student/student_detail'))
 const StudentAdd = LoadableComponent(()=>import('../../routes/Student/student_add'))
 
+//数据集管理
+const DataBaseInfo = LoadableComponent(()=>import('../../routes/DataBase/DataBase_info'))
 
 @withRouter
 class ContentMain extends React.Component {
+  // 构造
+    constructor(props) {
+      super(props);
+      // 初始状态
+      this.state = {};
+    }
+
+  componentDidMount() {
+
+  }
+
+
   render () {
     return (
       <div style={{padding: 16, position: 'relative'}} className={'test_stu'}>
@@ -33,7 +47,8 @@ class ContentMain extends React.Component {
           <PrivateRoute exact path='/student_info' component={StudentInfo}/>
           <PrivateRoute exact path='/student_info/student_detail' component={StudentDetail}/>
           <PrivateRoute exact path='/student_info/add_student' component={StudentAdd}/>
-          <PrivateRoute exact path='/home/about' component={About}/>
+          <PrivateRoute exact path='/data_info' component={DataBaseInfo}/>
+          <PrivateRoute exact path='/about' component={About}/>
           <Redirect exact from='/' to='/home'/>
         </Switch>
       </div>

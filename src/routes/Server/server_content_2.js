@@ -306,7 +306,8 @@ export default class Server_content_2 extends React.Component{
                     max_gpu,
                     fields
                 },()=>{
-                    console.log(chart_data)
+                    // console.log(chart_data)
+                    console.log(fields)
                 })
             }
             else {
@@ -498,7 +499,7 @@ export default class Server_content_2 extends React.Component{
                                 break;
                         }
 
-                        if (tag_type > 0 && tag_type <= 0.25) tag_type = 'purple'
+                        if (tag_type >= 0 && tag_type <= 0.25) tag_type = 'purple'
                         else if (tag_type > 0.25 && tag_type <= 0.5) tag_type = '#87d068'
                         else if (tag_type > 0.5 && tag_type <= 0.75) tag_type = '#2db7f5'
                         else if (tag_type > 0.75 ) tag_type = "#f50"

@@ -101,6 +101,7 @@ export let _fetch = async (url,data,resolve) =>{
   try {
     let response = await fetch(url,{
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

@@ -1,11 +1,12 @@
 const LOGIN_COOKIE_NAME = 'sessionId'
 
+
 export function isAuthenticated () {
   return _getCookie(LOGIN_COOKIE_NAME)
 }
 
 export function authenticateSuccess (token) {
-  _setCookie(LOGIN_COOKIE_NAME, token)
+  _setCookie(LOGIN_COOKIE_NAME, token, 0)
 }
 
 export function logout () {
@@ -31,6 +32,8 @@ function _getCookie (name) {
 function _setCookie (name, value, expire) {
   let date = new Date()
   date.setDate(date.getDate() + expire)
+  // console.log(name + '=' + escape(value) + '; path=/' +
+  //     (expire ? ';expires=' + date.toGMTString() : ''))
   document.cookie = name + '=' + escape(value) + '; path=/' +
-    (expire ? ';expires=' + date.toGMTString() : '')
+      (expire ? ';expires=' + date.toGMTString() : '')
 }

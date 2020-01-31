@@ -50,12 +50,13 @@ class Server_add extends React.Component {
         }
         if (info.file.status === 'done') {
             // Get this url from response in real world.
+            console.log(info.file)
             getBase64(info.file.originFileObj, imageUrl => this.setState({
                 imageUrl,
                 loading: false,
             }))
         } else if (info.file.status === 'error') {
-            // console.log(info.file)
+            console.log(info.file)
             message.error(`${info.file.name} 文件上传失败（${info.file.error.message}）`);
             this.setState({
                 loading: false
@@ -228,7 +229,7 @@ class Server_add extends React.Component {
             }}>
 
                 <Upload
-                    name="avatar"
+                    // name="avatar"
                     showUploadList={false}
                     action={`${HOST()+UPLOAD_IMG_TMP}`}
                     beforeUpload={this.beforeUpload}

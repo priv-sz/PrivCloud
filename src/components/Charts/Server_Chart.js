@@ -224,7 +224,7 @@ class Server_Chart extends React.Component {
                     <Axis
                         name="temperature"
                         label={{
-                            offset:1,
+                            offset:0,
                             formatter(text, item, index) {
                                 return `${text}℃`;
                             },
