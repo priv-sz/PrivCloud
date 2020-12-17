@@ -222,7 +222,7 @@ class StudentInfo extends React.Component {
     }
 
     componentDidMount() {
-        this.getRemoteData()
+        // this.getRemoteData()
     }
 
     componentWillMount() {

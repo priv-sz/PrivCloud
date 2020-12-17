@@ -6,14 +6,16 @@ export let HOST = function () {
     if (url.indexOf("192.168.88") !== -1 ){
         url = 'http://192.168.88.191:5000'
     }
-    else if (url.indexOf('localhost') !== -1 || url.indexOf('127.0.0.1') !== -1){
-        url = 'http://127.0.0.1:5000'
-        // url = 'http://127.0.0.1:9000'
-    }else {
+    // else if (url.indexOf('localhost') !== -1 || url.indexOf('127.0.0.1') !== -1){
+    //     url = 'http://127.0.0.1:5000'
+    //     // url = 'http://127.0.0.1:9000'
+    // }
+    else {
         // //测试
         // url = 'http://127.0.0.1:9000'
-        url = 'http://140.143.137.79:5000'
+        // url = 'http://211.103.201.178:5000/'
         // url = 'http://192.168.88.191:9000'
+        url = 'http://172.16.104.80:3000'
     }
 
     return url

@@ -22,6 +22,10 @@ const StudentAdd = LoadableComponent(()=>import('../../routes/Student/student_ad
 //数据集管理
 const DataBaseInfo = LoadableComponent(()=>import('../../routes/DataBase/DataBase_info'))
 
+//Model Zoo
+const Model_Zoo_Classification = LoadableComponent(()=>import('../../routes/Model_Zoo/Classification'))
+const Model_Zoo_Detection = LoadableComponent(()=>import('../../routes/Model_Zoo/Detection'))
+
 @withRouter
 class ContentMain extends React.Component {
   // 构造
@@ -48,6 +52,8 @@ class ContentMain extends React.Component {
           <PrivateRoute exact path='/student_info/student_detail' component={StudentDetail}/>
           <PrivateRoute exact path='/student_info/add_student' component={StudentAdd}/>
           <PrivateRoute exact path='/data_info' component={DataBaseInfo}/>
+          <PrivateRoute exact path='/model_zoo/classification_sub' component={Model_Zoo_Classification}/>
+          <PrivateRoute exact path='/model_zoo/detection_sub' component={Model_Zoo_Detection}/>
           <PrivateRoute exact path='/about' component={About}/>
           <Redirect exact from='/' to='/home'/>
         </Switch>

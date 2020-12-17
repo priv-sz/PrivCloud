@@ -46,18 +46,17 @@ const menus = [
     //   {key: '/home/entry/upload', title: '上传', icon: ''},
     // ]
   },
-  // {
-  //   title: '显示组件',
-  //   icon: 'desktop',
-  //   key: '/home/display',
-  //   // subs: [
-  //   //   {key: '/home/display/carousel', title: '轮播图', icon: ''},
-  //   //   {key: '/home/display/collapse', title: '折叠面板', icon: ''},
-  //   //   {key: '/home/display/list', title: '列表', icon: ''},
-  //   //   {key: '/home/display/table', title: '表格', icon: ''},
-  //   //   {key: '/home/display/tabs', title: '标签页', icon: '',},
-  //   // ]
-  // },
+  {
+    title: '模型库',
+    icon: 'desktop',
+    key: '/model_zoo',
+    subs: [
+      {key: '/model_zoo/classification_sub', title: '分类', icon: ''},
+      {key: '/model_zoo/detection_sub', title: '检测', icon: ''},
+      {key: '/model_zoo/segmentation_sub', title: '语义分割', icon: ''},
+      {key: '/model_zoo/keypoints_sub', title: '关键点', icon: ''},
+    ]
+  },
   // {
   //   title: '反馈组件',
   //   icon: 'message',

@@ -39,7 +39,9 @@ class CustomMenu extends React.Component {
     //当点击面包屑导航时，侧边栏要同步响应
     let pathname = nextProps.location.pathname
     const rank = pathname.split('/')
-    pathname = `/${rank[1]}`
+    // 适配 2 级菜单 (Model Zoo)
+    pathname = rank.length > 2 && `/${rank[2]}`.indexOf('_sub') != -1 ? pathname : `/${rank[1]}`
+    // pathname = `/${rank[1]}`
     if (this.props.location.pathname !== pathname) {
       this.setState({
         selectedKeys: [pathname],
